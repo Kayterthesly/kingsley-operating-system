@@ -1,7 +1,7 @@
 # WF-000 — Academic & Professional Identity Stack
 
 Version: 0.1
-Status: Draft — Section 2 of 6 complete
+Status: Draft — Section 3 of 6 complete
 Author: Kingsley Akenu
 Architect: Claude
 Last Updated: 2026-08-04
@@ -14,7 +14,7 @@ Governs: WF-001–WF-006 (proposed, not yet created) and any future workflow doc
 
 1. Purpose & Problem Statement — **complete**
 2. Scope & Definitions — **complete**
-3. Identity Artifact Registry — pending
+3. Identity Artifact Registry — **complete**
 4. Synchronization Model — pending
 5. Governance & Versioning — pending
 6. Relationship to the WF-00X Ecosystem — pending
@@ -153,8 +153,106 @@ This section depends on Section 1's drift definition remaining stable — every 
 - [x] The repository-visibility boundary case is resolved explicitly, not left ambiguous
 - [x] No glossary term is defined using itself
 - [x] Scope test table gives a directly reusable answer for at least one candidate not already named in Section 1
-- [ ] Confirmed by Kingsley before Section 3 begins
+- [x] Confirmed by Kingsley before Section 3 begins
 
 ---
 
-**Section 2 of 6 complete.**
+**Section 2 of 6 complete. Approved 2026-08-04.**
+
+---
+
+# 3. Identity Artifact Registry
+
+## Purpose
+
+Section 3 converts Section 2's scope boundary into a concrete, named list: every artifact currently inside that boundary, its single canonical source, its owner, and the class of event that should make someone check it for drift. This is the object the rest of the document exists to protect. Section 4 will define how synchronization is actually verified, but it can only operate on artifacts this section has already named and resolved to one canonical source.
+
+## Scope
+
+**In scope for this section:** naming every identity artifact currently identifiable from the project's files and the resume's own content; assigning exactly one canonical source and one owner per artifact; stating the class of event that should trigger a drift check.
+
+**Out of scope for this section** (deferred to later sections):
+- How a sync is actually executed, automated, or verified — Section 4
+- How this registry itself is amended when an artifact is added, retired, or reassigned — Section 5
+
+## Inputs
+
+- Section 2's scope boundary and glossary (Identity Artifact, Canonical Source, Sync Event, Process Artifact)
+- The resume (`Kingsley_Akenu_Resume_Updated (1).docx`), read directly rather than assumed
+- `Kingsley_Akenu_Resume_2.pdf`, read directly rather than assumed — see findings below
+- The project's actual file listing on disk, used as ground truth for what artifacts currently exist, rather than relying on any single document's self-description
+
+## Outputs
+
+### Artifact 1 — Resume
+
+Two files currently exist in the project claiming to be the resume:
+
+1. `Kingsley_Akenu_Resume_Updated (1).docx`
+2. `Kingsley_Akenu_Resume_2.pdf`
+
+Direct inspection of both — not just their filenames — resolves which is canonical:
+
+- **`Kingsley_Akenu_Resume_Updated (1).docx`** is the current version. It includes the healthcare readmission pipeline as the flagship project, the fuller Core Competencies list (tidymodels, XGBoost, glmnet, RAG/Gemini, governance audit trails), and both project write-ups (healthcare and crypto) under Notable Projects.
+- **`Kingsley_Akenu_Resume_2.pdf`** is a stale, earlier snapshot, not a duplicate. Its Professional Summary omits Healthcare entirely ("Retail, E-commerce, Finance, and Cryptocurrency markets"), its Flagship Project is the crypto pipeline, and its Notable Projects section has no healthcare entry at all — it predates that project's addition to the resume.
+
+There is a second, independent problem with this file: **despite the `.pdf` extension, it is not a valid PDF.** Direct inspection shows it is a ZIP archive containing two page images, two OCR text files, and a manifest — not PDF file structure. A PDF reader, an applicant tracking system, or a recruiter's file-type filter would likely fail to open it as expected.
+
+This also explains the Section 1 finding. The most likely sequence: the resume was originally built around the crypto pipeline as the flagship project — matching this older file — including its three "Dashboard / API Health / GitHub Source" links. When the healthcare project was added and promoted to flagship, the paragraph above those links was rewritten, but the three links themselves were never removed or repointed. What Section 1 documented as an isolated formatting error is more precisely the residue of this file's older content never being fully retired.
+
+| Field | Value |
+|---|---|
+| Canonical Source | `Kingsley_Akenu_Resume_Updated (1).docx` |
+| Owner | Kingsley Akenu |
+| Sync Trigger | Any change to the project portfolio, a metric, a role, or a date that would alter a claim currently made in the resume — including retirement of `Kingsley_Akenu_Resume_2.pdf` itself, which should be treated as the first sync action once Section 4's mechanics exist |
+
+### Artifacts 2–10 — Profiles and Live Project Endpoints
+
+| # | Artifact | Location | Canonical Source | Owner | Sync Trigger |
+|---|---|---|---|---|---|
+| 2 | GitHub Profile | github.com/Kayterthesly | The live profile itself | Kingsley Akenu | A repo is added, removed, or renamed; bio or pinned repos change |
+| 3 | LinkedIn Profile | linkedin.com/in/kayterthesly | The live profile itself | Kingsley Akenu | Role, certification, or project summary changes |
+| 4 | Portfolio Site (current) | kayterthesly.github.io/Kayterthesly | The live deployed site | Kingsley Akenu | A project is completed, the resume changes, or a repo is added |
+| 5 | Healthcare Pipeline — GitHub Repo | github.com/Kayterthesly/r-healthcare-readmission | The repository (code + README) | Kingsley Akenu | Any code, test, or deployment change that alters what the README claims |
+| 6 | Healthcare Pipeline — Live Dashboard | e9yw5n-kayterthesly.shinyapps.io/healthcare-readmission-pipeline/ | The live deployment | Kingsley Akenu | Redeploy, or the service is moved or retired |
+| 7 | Healthcare Pipeline — Live API | r-healthcare-readmission-production.up.railway.app/health | The live deployment | Kingsley Akenu | Redeploy, or the service is moved or retired |
+| 8 | Crypto Pipeline — GitHub Repo | github.com/Kayterthesly/crypto-price-pipeline | The repository (code + README) | Kingsley Akenu | Any code, test, or deployment change that alters what the README claims |
+| 9 | Crypto Pipeline — Live Dashboard | e9yw5n-kayterthesly.shinyapps.io/crypto-price-pipeline/ | The live deployment | Kingsley Akenu | Redeploy, or the service is moved or retired |
+| 10 | Crypto Pipeline — Live API | crypto-price-pipeline-production.up.railway.app/health | The live deployment | Kingsley Akenu | Redeploy, or the service is moved or retired |
+
+### Artifacts 11–12 — Conditional / Reserved
+
+| # | Artifact | Location | Canonical Source | Owner | Sync Trigger |
+|---|---|---|---|---|---|
+| 11 | KOS Repository | Unconfirmed — public status unknown | N/A until public (per Section 2 boundary case) | Kingsley Akenu | Activates only if/when the repository is made public |
+| 12 | Published Technical Writing | No current instance | N/A — reserved category | Kingsley Akenu | Activates on first publication (blog post, article, paper) |
+
+## Dependencies
+
+This section depends on Section 2's glossary for "Identity Artifact" and "Canonical Source." It does not depend on a glossary entry for "Owner" — that term is used here in its plain sense ("the person accountable for keeping this artifact's claims accurate"), not as specialized vocabulary, so its absence from Section 2 is not a gap requiring amendment.
+
+It also depends on every artifact having a uniform owner: Kingsley Akenu. That uniformity is a fact about the current stack, not a placeholder — it's what makes a single Sync Trigger column sufficient without a separate approver/reviewer field. If a collaborator or co-author is ever added to any artifact, this registry would need that distinction added; Section 5 (Governance & Versioning) is the natural place to define how such an amendment happens.
+
+Finally, this section depends on direct inspection of both resume files rather than trusting their filenames or extensions — `Kingsley_Akenu_Resume_2.pdf` identifies itself as a PDF but is not one internally. That distinction was only found by opening the file, consistent with KOS-001 Principle 7, "Evidence Over Assumptions."
+
+## Acceptance Criteria
+
+1. Every artifact identifiable from the project's actual files and the resume's own content is named — not a representative sample.
+2. Every artifact has exactly one canonical source. No artifact is left with two competing "canonical" claims.
+3. Where two candidate sources conflicted (the two resume files), the conflict is resolved with direct evidence, not resolved by default or assumption.
+4. No row describes synchronization mechanics — only the triggering condition.
+5. Every artifact has a named owner, and the uniformity of that value across the registry is explained rather than left unstated.
+
+## Verification Checklist
+
+- [x] Every artifact from the resume, the project's file listing, and the two-resume-file discrepancy is represented
+- [x] Exactly one canonical source is assigned per artifact
+- [x] The docx-vs-PDF conflict is resolved using direct file inspection, not assumption
+- [x] `Kingsley_Akenu_Resume_2.pdf`'s underlying format was independently verified (not a valid PDF) rather than taken on faith from its extension
+- [x] No entry describes automation, scripts, or CI mechanics — only trigger conditions
+- [x] "Owner" usage is checked against Section 2's glossary; the non-gap is explained
+- [ ] Confirmed by Kingsley before Section 4 begins
+
+---
+
+**Section 3 of 6 complete.**
