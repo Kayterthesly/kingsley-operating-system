@@ -38,6 +38,32 @@ To become a globally recognized researcher and builder of Data Intelligence Syst
 
 # 2. Research Interests
 
+## Primary Research Areas
+
+- Reliable Agentic AI
+- Decision Intelligence Systems
+- Human-AI Collaboration
+- Personal Intelligence Systems
+- Trustworthy Artificial Intelligence
+- AI Evaluation and Benchmarking
+
+## Supporting Technical Areas
+
+- Machine Learning
+- MLOps and Production AI Systems
+- Retrieval-Augmented Generation (RAG)
+- Knowledge Graphs
+- Data Engineering
+- Software Engineering for AI
+- Automation Systems
+- Cloud-native Machine Learning
+
+## Long-Term Research Vision
+
+To design and build intelligent systems that assist people and organizations in making better decisions by integrating machine learning, knowledge systems, software engineering, and human-centered AI into reliable production environments.
+
+Current implementation of this vision begins with the Kingsley Operating System (KOS), which serves as a Personal Intelligence System and experimental platform for future research in Decision Intelligence and Agentic AI.
+
 ---
 
 # 3. Education
