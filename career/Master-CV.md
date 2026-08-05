@@ -137,6 +137,78 @@ The following certifications and learning programs support ongoing professional 
 
 # 6. Technical Projects
 
+## Project Index
+
+### TP-001 — Healthcare Readmission Prediction Pipeline
+
+**Status:** Completed
+
+**Role:** Data Scientist / ML Engineer
+
+**Domain:** Healthcare
+
+**Core Technologies:**
+- Python
+- Machine Learning
+- FastAPI
+- Docker
+- GitHub Actions
+- Azure
+- MLflow
+- DVC
+
+**Summary**
+
+Production-grade machine learning system for predicting patient readmission risk, including automated testing, CI/CD, experiment tracking, model governance, REST API deployment, and cloud hosting.
+
+**Evidence**
+
+- GitHub Repository
+- Live API
+- Documentation
+- Architecture Diagrams
+
+---
+
+### TP-002 — Cryptocurrency Intelligence Pipeline
+
+**Status:** Completed
+
+**Role:** Data Analyst / Data Scientist
+
+**Domain:** Financial Analytics
+
+**Summary**
+
+End-to-end cryptocurrency analytics pipeline for data collection, transformation, visualization, and predictive analysis.
+
+**Evidence**
+
+- GitHub Repository
+- Dashboard
+- Documentation
+
+---
+
+### TP-003 — Kingsley Operating System (KOS)
+
+**Status:** Active
+
+**Role:** Designer / Builder
+
+**Domain:** Personal Intelligence Systems
+
+**Summary**
+
+Documentation-first Personal Intelligence System that integrates research management, career planning, learning, project tracking, and knowledge organization into a single engineering framework.
+
+**Future Research Themes**
+
+- Decision Intelligence
+- Personal Intelligence Systems
+- Agentic AI
+- Knowledge Management
+
 ---
 
 # 7. Technical Skills
