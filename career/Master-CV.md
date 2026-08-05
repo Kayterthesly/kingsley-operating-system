@@ -2,11 +2,14 @@
 
 **Owner:** Kingsley Akenu
 
-**Status:** Living Document
+**Status:** Active
 
-**Version:** 0.1
+**Version:** 0.2
 
-**Last Updated:** YYYY-MM-DD
+**Last Updated:** 2026-08-05
+
+**Purpose:**
+Canonical source of professional history, research, projects, publications, and career achievements. All resumes, scholarship CVs, portfolio content, LinkedIn updates, and academic applications derive from this document.
 
 ---
 
