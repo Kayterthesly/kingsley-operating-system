@@ -1,10 +1,10 @@
 # WF-000 — Academic & Professional Identity Stack
 
-Version: 0.1
-Status: Draft — Section 4 of 6 complete
+Version: 0.2
+Status: Draft — Section 5 of 6 complete
 Author: Kingsley Akenu
 Architect: Claude
-Last Updated: 2026-08-04
+Last Updated: 2026-08-05
 Depends On: KOS-001 (System Architecture), KOS-003 (Career North Star)
 Governs: WF-001–WF-006 (proposed, not yet created) and any future workflow document that creates or modifies a public-facing artifact
 
@@ -16,7 +16,7 @@ Governs: WF-001–WF-006 (proposed, not yet created) and any future workflow doc
 2. Scope & Definitions — **complete**
 3. Identity Artifact Registry — **complete**
 4. Synchronization Model — **complete**
-5. Governance & Versioning — pending
+5. Governance & Versioning — **complete**
 6. Relationship to the WF-00X Ecosystem — pending
 
 ---
@@ -291,7 +291,7 @@ Section 3 assigned a specific trigger to each artifact individually. Read togeth
 | Fact Change | The underlying truth about a project, role, metric, or credential changes | A new project ships; a metric is corrected; a role ends (Resume, LinkedIn) |
 | Deployment Change | A live system's actual state changes, independent of any narrative describing it | Redeploy, move, or retirement of a dashboard or API (Artifacts 5–10) |
 | Registry Change | The set of tracked artifacts itself changes | A repo is added or renamed (GitHub Profile); an artifact is retired (`Kingsley_Akenu_Resume_2.pdf`) |
-| Scheduled Review | A fixed interval passes, regardless of whether any other trigger fired | Catches drift with no discrete triggering event — Review cadence is governed by Section 5 and may vary by artifact type. |
+| Scheduled Review | A fixed interval passes, regardless of whether any other trigger fired | Catches drift with no discrete triggering event — review cadence is governed by Section 5 and may vary by artifact type |
 
 Every trigger in Section 3's registry falls into one of the first three classes. The fourth exists because event-driven triggers only catch drift someone notices happening — Scheduled Review is the backstop for drift that accumulates silently, the way the crypto/healthcare link mismatch apparently did.
 
@@ -367,8 +367,126 @@ It also depends on the four workflow roles remaining conceptually separable even
 - [x] Verification Workflow forms a closed loop: trigger → resolution → record → close
 - [x] No tooling, platform, or automation product is named anywhere in the section
 - [x] Roles table shows four distinct functions even though currently one owner
-- [ ] Confirmed by Kingsley before Section 5 begins
+- [x] Confirmed by Kingsley before Section 5 begins
 
 ---
 
-**Section 4 of 6 complete.**
+**Section 4 of 6 complete. Approved 2026-08-05, incorporating two refinements.**
+
+**Refinement log — 2026-08-05:** two changes proposed by Kingsley and accepted, applied directly to the Section 4 text above:
+1. Verification Workflow, Step 7 now records when a check occurred and who performed it, in addition to what was checked, found, and changed.
+2. The Scheduled Review trigger no longer proposes a fixed quarterly cadence; cadence is deferred to Section 5, which may vary by artifact type (resolved in Section 5.3 below).
+
+Per the versioning rule defined in Section 5.1, amending an already-approved section bumps the document's minor version. This edit moves WF-000 from Version 0.1 to **Version 0.2**, reflected in the front matter above.
+
+---
+
+# 5. Governance & Versioning
+
+## Purpose
+
+Section 5 defines how WF-000 itself changes over time without becoming unreliable: what a version number means, who has final say over a change, how often each type of artifact in the registry gets reviewed, how a proposed change moves from suggestion to accepted text, and what has to be true before this document can call itself stable. It's written partly in response to something that already happened: the two refinements just applied to Section 4 occurred before any rule existed for how such a change should be handled. This section formalizes a process that has already been used once, informally, rather than inventing one from scratch.
+
+## Scope
+
+**In scope for this section:** document-level versioning for WF-000 and, by the same convention, the WF-00X and KOS-00X series; approval authority; artifact review cadence by type (resolving Section 4's deferral); the amendment lifecycle; stability criteria for Version 1.0.
+
+**Out of scope for this section:**
+- How WF-000 specifically relates to and constrains WF-001–006 — Section 6
+- Any Git platform, project management tool, or software product — excluded by this section's own mandate
+
+## Inputs
+
+- Section 4's explicit deferral of review-cadence policy to this section, reinforced by Kingsley's second refinement above
+- The two refinements just applied to Section 4, used below as the worked example for the amendment process
+- Section 3's artifact registry and its categories, used as the basis for assigning cadence by type
+- KOS-001, Principle 6 ("Kaizen — improve a little every day"), which is what versioning and amendment exist to formally capture
+
+## Outputs
+
+### 5.1 Document Versioning
+
+Applies to governing documents — WF-000, and by the same convention the WF-00X and KOS-00X series. It does not apply to identity artifacts: the resume does not get a version number; its currency is handled by the review cadence in 5.3 and the canonical-source model in Section 4, not by this scheme.
+
+A two-part number, MAJOR.MINOR:
+
+- **0.x — Draft.** The document has not yet met the stability criteria in 5.5.
+  - **0.1** marks the first complete pass through every planned section — reaching it means the document exists in full for the first time, not that it's finished being refined.
+  - Each further **minor bump** (0.2, 0.3, …) marks a revision cycle in which an already-approved section is amended, corrected, or refined after the fact.
+- **1.0 — Stable.** Every criterion in 5.5 is met, and Kingsley has explicitly approved the bump.
+- **Post-1.0 major bump** (2.0, 3.0, …) marks a structural change: a section added, removed, or reordered, or a rule from an earlier section redefined in a way that changes what a downstream document (WF-001–006) can assume.
+
+**Applying the rule to what already happened:** the two refinements to Section 4 are the first instance of amending an already-approved section. Per the rule above, that makes this document's actual version, as of this edit, Version 0.2 — reflected in the front matter.
+
+### 5.2 Approval Authority
+
+Two rights, kept separate because they've already been exercised differently in this document's own history:
+
+- **Proposal rights** — Kingsley, or whoever is acting as architect/writer for a given document, may propose new content, a correction, or a refinement. Both of today's refinements to Section 4 were proposals of this kind.
+- **Approval authority** — Kingsley Akenu, exclusively. No section, artifact entry, or governance rule takes effect until he confirms it. Every section so far has ended on the same checklist item — "Confirmed by Kingsley before Section N begins" — and none has been treated as final without it being checked.
+
+This mirrors the Approver role defined at the artifact level in Section 4.4: the same person who signs off on a resolved drift also signs off on a change to the rules themselves. A governing document with an audience of one doesn't need a review board — it needs one consistently-applied confirmation step, which is already in place and doesn't need to be invented here.
+
+### 5.3 Artifact Review Cadence by Type
+
+Section 4 deferred this by design; Kingsley's second refinement made the deferral explicit: cadence is governed here and may vary by artifact type. Applied to Section 3's registry:
+
+| Artifact Type | Cadence | Rationale |
+|---|---|---|
+| Resume | Before every application, at minimum | Highest stakes — a new, one-time audience reads it each time it's used |
+| LinkedIn / GitHub Profile | Monthly, or immediately on any Fact or Registry Change | Always visible; there's no natural "before it's read" checkpoint |
+| Portfolio Site | Monthly, or immediately after the Resume changes | Makes the same claims as the Resume, to the same kind of audience — should never lag behind it |
+| Live Dashboards & APIs | Monthly liveness/accuracy check | Can silently go down or drift with no visible signal until someone clicks the link |
+| Project GitHub Repos / READMEs | On every Fact or Deployment Change, plus a light quarterly staleness check | Changes less often once a project stabilizes; the quarterly check catches what event triggers miss |
+| Completed Project Write-ups (Notable Projects) | Occasional — annually, or on major revision to the underlying project | Describes finished work; nothing forces frequent review once it's accurate |
+| Conditional / Reserved (KOS Repo, Published Writing) | Not applicable until activated | Per Section 3 — no cadence applies to an artifact that isn't active |
+
+Every artifact type in the registry now has an assigned cadence; Section 4's deferral is fully resolved, not partially.
+
+### 5.4 Amendment Process
+
+1. **Propose** — state the specific change and why, in plain language. No ticket or platform is required; a clearly labeled statement is enough, as both refinements above demonstrated.
+2. **Review** — check the proposal against three things: does it contradict a definition or decision already approved elsewhere in the document; does it stay inside Section 2's scope boundary; does it preserve tooling independence where that's required.
+3. **Accept** — Kingsley confirms explicitly. Silence is not acceptance.
+4. **Record** — log what changed, when, and who accepted it — the same discipline Section 4's Step 7 now requires of artifact-level checks, applied here to the document itself.
+
+**Validating this against what already happened:** both refinements above followed exactly this sequence — proposed with a stated rationale, checked against the tooling-independence rule already in force, accepted explicitly ("Section 4 is approved"), and recorded via the refinement log and version bump. The process describes what this document has already done once; it wasn't designed in the abstract first.
+
+### 5.5 Stability Criteria (Version 1.0)
+
+WF-000 becomes eligible for Version 1.0 when all of the following hold:
+
+1. Every section in the Document Map is complete and individually confirmed — no "pending" items remain.
+2. Every forward reference an earlier section made to a later one has been resolved (Section 4's deferral of cadence policy, resolved in 5.3, is one example).
+3. The document has been applied to at least one real case without requiring a structural change to fix it.
+4. At least one revision cycle has occurred — a section amended after being marked complete, without breaking anything upstream or downstream of it.
+5. Kingsley explicitly approves the bump. Meeting 1–4 makes the document *eligible*; it does not make the bump automatic, consistent with 5.2.
+
+**Current status:** criteria 3 and 4 are already satisfied — Sections 1, 3, and 4 have each been tested against the real crypto/healthcare link mismatch and held up without restructuring, and today's Section 4 refinement is the first completed revision cycle. Criteria 1 and 2 are not yet satisfied: Section 6 remains, and it covers this document's literal reason for existing per Section 1 — its relationship to WF-001–006. WF-000 is not eligible for Version 1.0 until Section 6 is complete.
+
+## Dependencies
+
+This section depends on Section 3's artifact categories remaining the basis for cadence assignment in 5.3 — if the registry's shape changes materially, cadence-by-type should be revisited, not assumed to still fit. It also depends on Section 2's definition of Governing Document holding: the versioning scheme in 5.1 applies to documents like WF-000 that constrain other documents, not to identity artifacts, which are governed by cadence and canonical-source rules instead.
+
+## Acceptance Criteria
+
+1. The versioning rule is applied to a real, already-occurred event (today's Section 4 refinement), not only described in the abstract.
+2. Every artifact type from Section 3 has an assigned review cadence — Section 4's deferral is fully resolved.
+3. The amendment process is validated against the two refinements actually proposed, reviewed, and accepted earlier in this conversation.
+4. Stability criteria for Version 1.0 are stated as checkable conditions, and WF-000's current status against them is reported honestly rather than rounded up.
+5. No Git platform, project management tool, or software product is named anywhere in this section.
+6. Document versioning (for governing documents) and artifact review cadence (for identity artifacts) are kept explicitly distinct.
+
+## Verification Checklist
+
+- [x] Versioning rule is defined and immediately applied — WF-000 moves from 0.1 to 0.2 in this same edit
+- [x] Every Section 3 artifact type has an assigned cadence; none left unresolved
+- [x] Amendment process matches, in retrospect, exactly what happened with today's two refinements
+- [x] Stability criteria are checkable, and WF-000 is honestly assessed as not yet meeting all of them
+- [x] No tool, platform, or software product is named anywhere in this section
+- [x] Document-versioning vs. artifact-cadence distinction is stated explicitly
+- [ ] Confirmed by Kingsley before Section 6 begins
+
+---
+
+**Section 5 of 6 complete.**
