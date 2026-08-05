@@ -12,6 +12,25 @@
 
 # 1. Professional Profile
 
+## Professional Summary
+
+Data Scientist, AI Engineer, and MLOps practitioner focused on building production-grade intelligent systems that combine machine learning, data engineering, software engineering, and decision intelligence.
+
+Experienced in designing end-to-end analytical solutions across healthcare, finance, retail, and cryptocurrency domains, with practical expertise in predictive modeling, Retrieval-Augmented Generation (RAG), cloud deployment, REST APIs, CI/CD, automated testing, and governance-first machine learning.
+
+Current long-term research interests include:
+
+- Reliable Agentic AI
+- Decision Intelligence
+- Human-AI Collaboration
+- Personal Intelligence Systems
+- AI Evaluation
+- Trustworthy Machine Learning
+
+Long-term career objective:
+
+To become a globally recognized researcher and builder of Data Intelligence Systems that combine artificial intelligence, software engineering, research, and automation to solve meaningful real-world problems.
+
 ---
 
 # 2. Research Interests
