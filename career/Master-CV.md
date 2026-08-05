@@ -68,6 +68,63 @@ Current implementation of this vision begins with the Kingsley Operating System 
 
 # 3. Education
 
+## Formal Education
+
+### Higher National Diploma (HND) — Mass Communication
+
+**Institution:** Lagos State Polytechnic, Lagos, Nigeria
+
+**Year Awarded:** 2024
+
+**Classification:** Upper Credit
+
+Relevant Coursework:
+- Research Methods
+- Mass Communication Theory
+- Media Studies
+- Public Relations
+- Organizational Communication
+
+---
+
+### National Diploma (ND) — Mass Communication
+
+**Institution:** Lagos State Polytechnic, Lagos, Nigeria
+
+**Year Awarded:** 2019
+
+---
+
+## Professional Training
+
+### Data Science Certification
+
+**Institution:** Aptech Learning
+
+**Status:** Completed (2026)
+
+Major Areas:
+- Python
+- Machine Learning
+- Statistics
+- SQL
+- Data Analytics
+- Business Intelligence
+
+---
+
+## Continuous Professional Development
+
+The following certifications and learning programs support ongoing professional development:
+
+- Google Data Analytics Professional Certificate
+- Deloitte Data Analytics Job Simulation
+- Business Analytics with Excel
+- Excel Skills for Business Specialization
+- Process Data from Dirty to Clean
+- Introduction to Statistics (Stanford)
+- AI/ML Applications in Analytics
+
 ---
 
 # 4. Professional Experience
