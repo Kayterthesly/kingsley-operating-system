@@ -1,165 +1,181 @@
 # Career Identity
 
-Author: Kingsley Akenu
-
-Status: Active
-
-Last Updated: 2026-08-05
+**Version:** 1.0  
+**Status:** Canonical  
+**Owner:** Kingsley Akenu
 
 ---
 
-# 1. Professional Identity
+# Purpose
 
-I am an aspiring AI and Data Intelligence engineer building expertise at the intersection of data science, artificial intelligence, software engineering, automation, and research. My professional identity is centered on designing intelligent systems that transform data into reliable decisions through scalable software, rigorous research, and human-centered AI.
+This document defines my professional identity independently of any single job title, employer, degree, or project.
 
----
+It serves as the canonical source for:
 
-# 2. Career Vision
+- professional positioning
+- career decisions
+- resume strategy
+- graduate school positioning
+- portfolio development
+- research direction
+- public professional profiles
 
-To become a globally recognized researcher, engineer, and entrepreneur who builds Data Intelligence Systems that enable trustworthy, explainable, and impactful decision-making across industries. My work should bridge academic research and real-world deployment while contributing to the advancement of reliable Agentic AI and human-AI collaboration.
-
----
-
-# 3. Mission Statement
-
-I aim to build intelligent systems that help people and organizations make better decisions by combining artificial intelligence, data engineering, machine learning, automation, and scientific research. My long-term goal is to produce solutions that are technically rigorous, practically useful, and socially responsible.
-
----
-
-# 4. Core Expertise
-
-## Technical Capabilities
-
-- Data Analysis
-- Data Visualization
-- SQL
-- Python
-- Machine Learning
-- Data Engineering Fundamentals
-- AI Engineering
-- API Development
-- Git & GitHub
-- Automation
-- Software Development
-
-## Research Capabilities
-
-- Literature Review
-- Research Documentation
-- Experimental Design
-- Technical Writing
-- Reproducibility
-- Model Evaluation
-- Problem Formulation
-
-## Business / Domain Capabilities
-
-- Decision Support
-- Business Intelligence
-- Healthcare Analytics
-- Financial Data Analysis
-- Process Automation
-- AI Product Thinking
+Any future career document should align with this identity unless an intentional strategic change is made.
 
 ---
 
-# 5. Problem Areas
+# Professional Identity
 
-I am particularly interested in solving problems involving:
+I am an emerging Data Scientist and AI Engineer focused on designing intelligent systems that improve how organizations make decisions.
 
-- Decision Intelligence
-- Healthcare Analytics
-- Human-AI Collaboration
-- Reliable AI Systems
-- AI Evaluation
-- Research Automation
-- Knowledge Management
-- Personal Intelligence Systems
-- Intelligent Automation
+My work combines machine learning, data engineering, software engineering, and applied research to transform complex data into practical, trustworthy, and measurable solutions.
+
+Rather than viewing AI as a standalone technology, I approach it as part of larger decision-support systems that integrate data pipelines, predictive models, human expertise, and operational workflows.
 
 ---
 
-# 6. Target Roles
+# Professional Philosophy
 
-## Immediate
+Technology creates value only when it improves decisions.
 
-- Data Analyst
-- Business Intelligence Analyst
-- Junior Data Scientist
-- AI Automation Engineer
-- Research Assistant
-- Data Science Intern
+Building sophisticated models is not the objective.
 
-## Medium-Term
+The objective is helping people and organizations make better decisions using reliable data, well-engineered systems, and interpretable artificial intelligence.
 
-- Machine Learning Engineer
-- AI Engineer
-- Applied AI Researcher
-- Data Intelligence Engineer
+Every project should balance:
 
-## Long-Term
-
-- Research Scientist
-- AI Systems Architect
-- Founder of an AI company
-- Professor / Research Lead
-- Builder of Personal Intelligence Systems
+- technical excellence
+- practical usefulness
+- maintainability
+- measurable impact
+- ethical responsibility
 
 ---
 
-# 7. Industries of Interest
+# Long-Term Identity
+
+Over the course of my career I intend to become a researcher and systems builder specializing in AI-driven decision intelligence.
+
+My work will increasingly sit at the intersection of:
 
 - Artificial Intelligence
-- Healthcare Technology
-- Research Labs
-- Education Technology
-- Financial Technology
-- Decision Intelligence
-- Enterprise Software
-- Data Platforms
-- Government Innovation
-- Climate & Social Impact Technology
+- Machine Learning
+- Data Engineering
+- Decision Science
+- Healthcare Analytics
+- Research Engineering
+
+I aim to contribute both practical software systems and original research.
 
 ---
 
-# 8. Signature Projects
+# Professional Principles
 
-Current
+## Solve meaningful problems
 
-- Healthcare Readmission Prediction Pipeline
-- Kingsley Operating System (KOS)
-
-Planned
-
-- Agentic Decision Intelligence Platform
-- Research Portfolio Website
-- Personal Intelligence System
-- AI Evaluation Toolkit
+I prioritize problems whose solutions create measurable improvements for people, organizations, or society.
 
 ---
 
-# 9. Research Interests
+## Build systems, not demonstrations
 
-- Reliable Agentic AI
-- Decision Intelligence
-- Human-AI Collaboration
-- AI Evaluation
-- Trustworthy AI
-- Knowledge Graphs
-- Personal Intelligence Systems
-- Research Automation
-- Intelligent Decision Support
+I prefer complete, production-quality systems over isolated machine learning models.
 
 ---
 
-# 10. Personal Differentiators
+## Evidence over assumptions
 
-My background combines software engineering discipline, documentation-first development, research-driven learning, and a systems-thinking mindset. Rather than focusing on isolated projects, I aim to build integrated platforms where each artifact strengthens my portfolio, research profile, professional network, and long-term career trajectory simultaneously.
+Every technical decision should be supported by experimentation, data, or established research.
 
 ---
 
-# 11. Professional Narrative
+## Continuous improvement
 
-My career began with an interest in software and data, but evolved into a broader mission of building intelligent systems that improve human decision-making. Rather than treating data science, AI, software engineering, and research as separate disciplines, I see them as interconnected components of Data Intelligence Systems.
+Skills, systems, documentation, and research should evolve continuously through deliberate iteration.
 
-Every project I build, every document I write, and every research direction I pursue contributes toward becoming a globally competitive researcher and engineer capable of designing trustworthy AI systems with measurable real-world impact.
+---
+
+## Research-informed engineering
+
+Engineering should benefit from research, while research should remain grounded in practical implementation.
+
+---
+
+# Professional Strengths
+
+My strongest capabilities include combining multiple technical disciplines into coherent systems.
+
+These include:
+
+- Machine Learning
+- Data Science
+- Data Engineering
+- Python Development
+- Backend Development
+- SQL
+- Model Deployment
+- API Development
+- Documentation
+- Technical Communication
+
+---
+
+# Career Positioning
+
+I do not position myself as only:
+
+- a Software Engineer
+- a Machine Learning Engineer
+- a Data Analyst
+- a Backend Developer
+
+Instead, I position myself as someone who integrates these disciplines to design intelligent decision-support systems.
+
+---
+
+# Research Orientation
+
+My professional growth is increasingly aligned with research.
+
+I intend to contribute to applied AI research where academic rigor and practical engineering reinforce one another.
+
+My preferred research style emphasizes reproducibility, experimentation, transparency, and real-world deployment.
+
+---
+
+# Decision Filter
+
+Professional opportunities should move me toward at least one of the following:
+
+- stronger AI expertise
+- stronger machine learning capability
+- stronger data engineering capability
+- stronger research experience
+- stronger systems design capability
+- stronger publication profile
+- stronger healthcare AI expertise
+
+If an opportunity advances none of these areas, it should be carefully evaluated before accepting.
+
+---
+
+# Professional Success
+
+I consider professional success to include:
+
+- building respected AI systems
+- producing publishable research
+- solving meaningful organizational problems
+- earning trust through technical excellence
+- mentoring future practitioners
+- contributing to responsible AI adoption
+
+Salary alone is not an adequate measure of success.
+
+---
+
+# Canonical Statement
+
+This document is the authoritative description of my professional identity.
+
+Future resumes, biographies, websites, LinkedIn profiles, graduate applications, and professional documents should remain consistent with the principles defined here.
