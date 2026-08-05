@@ -1,7 +1,7 @@
 # WF-000 — Academic & Professional Identity Stack
 
 Version: 0.1
-Status: Draft — Section 3 of 6 complete
+Status: Draft — Section 4 of 6 complete
 Author: Kingsley Akenu
 Architect: Claude
 Last Updated: 2026-08-04
@@ -15,7 +15,7 @@ Governs: WF-001–WF-006 (proposed, not yet created) and any future workflow doc
 1. Purpose & Problem Statement — **complete**
 2. Scope & Definitions — **complete**
 3. Identity Artifact Registry — **complete**
-4. Synchronization Model — pending
+4. Synchronization Model — **complete**
 5. Governance & Versioning — pending
 6. Relationship to the WF-00X Ecosystem — pending
 
@@ -251,8 +251,124 @@ Finally, this section depends on direct inspection of both resume files rather t
 - [x] `Kingsley_Akenu_Resume_2.pdf`'s underlying format was independently verified (not a valid PDF) rather than taken on faith from its extension
 - [x] No entry describes automation, scripts, or CI mechanics — only trigger conditions
 - [x] "Owner" usage is checked against Section 2's glossary; the non-gap is explained
-- [ ] Confirmed by Kingsley before Section 4 begins
+- [x] Confirmed by Kingsley before Section 4 begins
 
 ---
 
-**Section 3 of 6 complete.**
+**Section 3 of 6 complete. Approved 2026-08-04.**
+
+---
+
+# 4. Synchronization Model
+
+## Purpose
+
+Section 4 defines how the registry from Section 3 stays accurate over time: what class of event should prompt a check, the exact test for whether an artifact has drifted, the workflow that runs from trigger to resolution, and which role in that workflow is responsible for each step. It is deliberately silent on tooling — no automation platform, script, or service is named — so the model stays valid whether it's executed by hand, by script, or by something adopted later, and doesn't need to be rewritten when the tooling changes.
+
+## Scope
+
+**In scope for this section:** a trigger taxonomy abstracted from Section 3's per-artifact triggers, a drift-detection test, a verification workflow, and the roles that carry it out.
+
+**Out of scope for this section:**
+- Any specific tool, platform, script, or automation product — excluded by this section's own mandate
+- How this model itself gets amended over time — Section 5
+- How WF-000 relates to WF-001–006 — Section 6
+
+## Inputs
+
+- Section 3's registry — 10 confirmed artifacts plus 2 conditional entries, each already assigned a canonical source and a per-artifact trigger
+- Section 1's definition of drift, and its one confirmed real example (the healthcare/crypto link mismatch), used below to validate this section's model rather than just assert it
+- Section 2's convention that "Owner" is used in its plain sense, extended here into named workflow roles
+
+## Outputs
+
+### Trigger Taxonomy
+
+Section 3 assigned a specific trigger to each artifact individually. Read together, those triggers fall into four general classes:
+
+| Trigger Class | Definition | Example from the Registry |
+|---|---|---|
+| Fact Change | The underlying truth about a project, role, metric, or credential changes | A new project ships; a metric is corrected; a role ends (Resume, LinkedIn) |
+| Deployment Change | A live system's actual state changes, independent of any narrative describing it | Redeploy, move, or retirement of a dashboard or API (Artifacts 5–10) |
+| Registry Change | The set of tracked artifacts itself changes | A repo is added or renamed (GitHub Profile); an artifact is retired (`Kingsley_Akenu_Resume_2.pdf`) |
+| Scheduled Review | A fixed interval passes, regardless of whether any other trigger fired | Catches drift with no discrete triggering event — Review cadence is governed by Section 5 and may vary by artifact type. |
+
+Every trigger in Section 3's registry falls into one of the first three classes. The fourth exists because event-driven triggers only catch drift someone notices happening — Scheduled Review is the backstop for drift that accumulates silently, the way the crypto/healthcare link mismatch apparently did.
+
+### Drift Detection Procedure
+
+Given a fact **F** and the canonical source assigned to it in Section 3:
+
+1. Identify every registry artifact whose content could plausibly make a claim about F.
+2. For each one, extract its current claim about F.
+3. Compare that claim against the canonical source's current value for F.
+4. Classify the result:
+   - **Synced** — the claim matches the canonical value.
+   - **Drifted** — a claim exists and contradicts the canonical value.
+   - **Gap** — the artifact makes no claim about F at all.
+
+Drift and Gap are different problems with different fixes. Drift means an artifact is actively wrong and needs correcting. Gap means an artifact is silent, which may be fine (not everything needs to mention everything) or may need a decision — but it is not automatically an error the way Drift is.
+
+**Worked example — validating the procedure against the known Section 1 case:**
+
+| Step | Value |
+|---|---|
+| F | Which live links follow the Flagship Project description in the resume |
+| Canonical source | The r-healthcare-readmission project's actual live links (Section 3, Artifacts 5–7) — healthcare is the current flagship project |
+| Dependent artifact | The resume's "Flagship Project 1" block |
+| Dependent claim | Crypto-pipeline links appear immediately after the healthcare description |
+| Comparison | Dependent claim ≠ canonical value |
+| Classification | **Drifted** |
+
+The procedure reproduces the finding Section 1 made by inspection alone. That's the actual test of whether this section is doing new work or just restating Section 1 in more formal language — it passes.
+
+### Verification Workflow
+
+1. **Trigger fires** — one of the four classes above occurs.
+2. **Scope the fact** — identify the specific claim the trigger concerns, not the whole artifact.
+3. **Pull canonical value** — check the canonical source assigned in Section 3.
+4. **Check dependents** — apply the Drift Detection Procedure to every artifact that could plausibly reference that fact.
+5. **Classify** — Synced / Drifted / Gap, per artifact checked.
+6. **Resolve** — correct anything Drifted so it matches canonical truth. (If the canonical source itself is wrong, fix it first, then re-run steps 3–5 before propagating further.) For a Gap, make a decision rather than defaulting to silence.
+7. **Record the check** — note when the check occurred, what was checked, what was found, what changed, and who performed the verification. The form of this record isn't specified here — a changelog line, a note, a commit message all satisfy it — only that a check which isn't recorded is indistinguishable from a check that never happened.
+8. **Close** — the trigger is resolved once every affected dependent is Synced, or its Gap was a deliberate decision rather than an oversight.
+
+### Roles & Ownership within the Workflow
+
+| Role | Responsible For | Currently |
+|---|---|---|
+| Initiator | Noticing or declaring that a trigger has fired | Kingsley Akenu |
+| Verifier | Steps 2–5: scoping the fact, pulling canonical value, checking dependents, classifying | Kingsley Akenu |
+| Resolver | Step 6: making the actual correction | Kingsley Akenu |
+| Approver | Steps 7–8: confirming the resolution is correct and closing the check | Kingsley Akenu |
+
+All four roles currently resolve to one person. They're kept distinct anyway, because that's what lets a future collaborator take on a single role for a single artifact — a co-author signing off as Approver on a shared publication, for instance — without this section needing to be restructured. How a role reassignment would actually be approved belongs to Section 5, not this one.
+
+## Dependencies
+
+This model depends on Section 3's canonical-source assignments being correct. If a canonical source is itself wrong, this model will faithfully propagate that wrong value to every dependent artifact — drift detection only checks consistency with the canonical source, not the canonical source's own accuracy. That's a real limitation, not an oversight: verifying a canonical source's own correctness is closer to fact-checking the underlying project claims, and is out of scope for a synchronization model.
+
+It also depends on the four workflow roles remaining conceptually separable even while collapsed into one person today — the model doesn't require multiple people, only that the roles don't need to be invented later if that changes.
+
+## Acceptance Criteria
+
+1. Every trigger class is derived from patterns actually present in Section 3's registry, not invented in the abstract.
+2. The Drift Detection Procedure is precise enough to apply by hand to a real case without further interpretation.
+3. The procedure is validated against the one confirmed real drift case from Section 1 and correctly classifies it.
+4. No tool, platform, script, or automation product is named anywhere in this section.
+5. Workflow roles are functionally distinct even though currently assigned to one person.
+6. The model states what it cannot do (verify a canonical source's own correctness) rather than implying it catches everything.
+
+## Verification Checklist
+
+- [x] Trigger taxonomy covers every trigger type present in Section 3's registry
+- [x] Drift Detection Procedure distinguishes "Drifted" from "Gap" as separate conditions
+- [x] The procedure is run against the real Section 1 case and correctly returns "Drifted"
+- [x] Verification Workflow forms a closed loop: trigger → resolution → record → close
+- [x] No tooling, platform, or automation product is named anywhere in the section
+- [x] Roles table shows four distinct functions even though currently one owner
+- [ ] Confirmed by Kingsley before Section 5 begins
+
+---
+
+**Section 4 of 6 complete.**
