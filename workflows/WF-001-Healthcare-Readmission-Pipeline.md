@@ -1,7 +1,7 @@
 # WF-001 — Healthcare Readmission Pipeline: Operating Model & Reusable Engineering Workflow
 
 Version: Not yet assigned — versioning begins at 0.1 upon first complete pass through every planned section (WF-000 §5.1)
-Status: In Progress — Sections 1–3 approved; Section 4 not yet drafted
+Status: In Progress — Sections 1–4 approved; Section 5 drafted, pending confirmation
 Author: Kingsley Akenu
 Architect: Claude
 Last Updated: 2026-08-06
@@ -16,8 +16,8 @@ Registry Cross-Reference: WF-000 §3, Artifacts 5–7 (Healthcare Pipeline — G
 1. Purpose & Problem Statement — **approved**
 2. Scope, Definitions & Governance Inheritance — **approved**
 3. Evidence Base & Source Reconciliation — **approved**
-4. Objectives & Constraints — pending
-5. System Architecture & Design Rationale — pending
+4. Objectives & Constraints — **approved**
+5. System Architecture & Design Rationale — **drafted, pending confirmation**
 6. Engineering Process — Build Sequence & Diagnostic Discipline — pending
 7. Success Metrics, Fairness & Honest Evaluation — pending
 8. Testing & CI/CD Verification — pending
@@ -260,17 +260,208 @@ Unless explicitly noted otherwise, technical claims made in Sections 4 through 1
 
 **Section 3 of 12 complete. Approved 2026-08-06.**
 
----
-
 # 4. Objectives & Constraints
 
-*Pending. Will document what the pipeline set out to achieve and the constraints that bounded its design.*
+## Purpose
+
+Section 4 opens the documented instance: the first of the seven content dimensions WF-000 §6.1 assigns to WF-001 — objectives, constraints, architecture, success metrics, testing, deployment, governance. It establishes what the pipeline was actually built to achieve, and what bounded how it could be achieved, so that Section 5's architecture reads as a response to stated requirements rather than an arbitrary set of technology choices.
+
+Every claim in this section is sourced under the evidence hierarchy Section 3 established: derived from the three authoritative technical documents, with no re-litigation of source authority required. Where a claim is inferred rather than directly stated, that distinction is made explicit rather than blurred — this section contains two such cases, handled differently depending on how strong the underlying evidence is.
+
+## Scope
+
+**In scope for this section:** the pipeline's objectives — both the stated clinical problem and the demonstrated portfolio purpose — and the real, evidenced constraints that bounded its design.
+
+**Out of scope for this section** (deferred to later sections):
+- The architectural response to these objectives and constraints — Section 5
+- The engineering process used to work within these constraints — Section 6
+- Metrics and what they certify — Section 7
+
+## Outputs
+
+### Objectives
+
+The pipeline's objectives operate at two levels, both directly evidenced rather than read from a single framing.
+
+**Stated objective — the clinical problem the system addresses.** Flag patients at high risk of 30-day hospital readmission at the point of discharge, explain each flag with the factors that drove it, retrieve the clinical guidelines relevant to that patient's conditions, and generate a cited discharge recommendation. README_portfolio.md frames the underlying cost as a metric explicitly monitored by CMS and insurance providers as a quality indicator, priced at $15,000–$20,000 per unnecessary readmission.
+
+**Actual objective — what the project is built to demonstrate.** The system is explicitly not a clinical product: "FOR PORTFOLIO DEMONSTRATION ONLY — NOT FOR CLINICAL USE" appears as a standing banner in README_portfolio.md and, per project_summary.md, is "clearly labeled in the API's disclaimer on every response." project_summary.md states the real objective directly, under "What This Demonstrates": the pipeline exists to show, for a data science portfolio, a complete ML lifecycle — data engineering, governance, the API, monitoring, CI/CD, and testing, not just the modeling step — with each stage built in sequence with real verification before moving on. The specific skills the source material names as the actual target of the exercise: production R engineering, SQL-first data engineering at scale, responsible ML practice, RAG system design without new packages, testable REST API design, CI/CD with R, and Windows-specific DuckDB debugging.
+
+**A qualifying objective, not merely a constraint: honest disclosure.** project_summary.md frames the decision to report a modest AUC-ROC (0.566) with full root-cause explanation, rather than tuning toward a more impressive number, as "itself a technical and ethical choice worth noting." presentation_nontechnical.md devotes its closing slide to naming this as the project's operating philosophy — KAIZEN (改善) — stating plainly that the word "honest" is "load-bearing." This is classified here as an objective rather than a passive constraint because the source material frames it as something actively chosen and pursued, not a limitation the project merely happened to operate under.
+
+### Constraints
+
+| Constraint | Evidence | Effect on the Pipeline |
+|---|---|---|
+| Real source data limited to 100 patients (MIMIC-IV MEDS demo); the full ~50,000-patient MIMIC-IV requires PhysioNet credentialing not obtained in this phase | project_summary.md, "What Would Come Next"; presentation_nontechnical.md, Slide 3 and Slide 10 speaker notes | Named directly as the root cause of the model's modest AUC-ROC (0.566) — a signal ceiling, not a modeling defect |
+| MIMIC-IV de-identifies by shifting each patient's dates by a random, patient-specific offset | presentation_nontechnical.md, Slide 7 speaker notes | Made a temporal train/test split methodologically meaningless; forced a patient-level split instead |
+| The 9-million-row lab measurement table is too large to load into R memory | project_summary.md, Stage 3; presentation_nontechnical.md, Slide 6 speaker notes | Forced a SQL-first architecture — all heavy aggregation computed in DuckDB, never loaded into R |
+| Vectorized measurement resampling would explode to roughly 121 million rows without a cap | presentation_nontechnical.md, Slide 4 speaker notes | Capped at 300 labs per visit during synthesis |
+| A Windows-specific DuckDB file-locking problem appeared during rapid sequential test execution | project_summary.md, Stage 9; README_portfolio.md, Testing section | Forced a connection-singleton pattern in the test setup |
+| A Windows-specific XGBoost `predcontrib` alignment bug (`array_interface.h:422`) | presentation_nontechnical.md, Slide 11 speaker notes | Bypassed with a pure-R explainability approach instead of the native XGBoost path |
+| A seven-calendar-day build window — Stage 0 dated 2026-06-19 through Stage 9 dated 2026-06-25, per the dated stage notes | project_summary.md, File Inventory (`notes/` listing) | Not stated as a constraint directly; inferred from the dated notes themselves. Stages 1–3 share a single date (6/20) and Stages 6–7 share another (6/23) |
+
+Team size and resourcing are not addressed by any of the three authoritative technical documents. All three show a single, consistent byline — Kingsley Akenu (@Kayterthesly — KAIZEN 改善) — with no team, collaborator, or division-of-labor reference anywhere in the source material. That is evidence of an unaddressed topic, not evidence of a specific team size; this document notes the gap rather than asserting a headcount the source material doesn't state.
+
+## Acceptance Criteria
+
+1. Every stated objective, constraint, and evidentiary inference traces to a specific, named passage in one or more of the three authoritative technical documents, with inferred conclusions explicitly identified as such.
+2. The pipeline's stated (clinical) objective and its actual (portfolio/demonstration) objective are presented as explicitly distinct, not blended into one description.
+3. Honest disclosure is classified and justified as an objective rather than a passive constraint, with the specific evidence supporting that classification.
+4. Where a candidate constraint (team size and resourcing) is not directly evidenced, that gap is stated explicitly rather than filled with an inference presented as fact.
+5. The one constraint presented as an inference from evidence (the seven-day build window) is clearly distinguished from the constraints stated directly in the source material.
+
+## Verification Checklist
+
+- [x] Every objective and constraint cites a specific source document and location
+- [x] Stated (clinical) objective and actual (portfolio) objective are presented as explicitly distinct, not merged
+- [x] Honest disclosure's classification as an objective, not a constraint, is justified with direct evidence
+- [x] The team-size/resourcing gap is stated as an unaddressed topic, not asserted as a fact
+- [x] The seven-day build-window finding is labeled as an inference from dated files, distinct from the directly-stated constraints
+- [x] Confirmed by Kingsley before Section 5 begins
+
+---
+
+**Section 4 of 12 complete. Approved 2026-08-06.**
 
 ---
 
 # 5. System Architecture & Design Rationale
 
-*Pending. Will document the layered system design and the reasoning behind specific technical choices.*
+## Purpose
+
+Section 5 answers the question Section 4 leaves open: given those objectives and those constraints, why was the pipeline built this particular way? It is deliberately organized around decisions and their rationale, not around a tech-stack inventory — a list of tools says what was used; this section explains what problem each major structural choice solved, and, where a real trade-off existed, what was given up to solve it.
+
+Every design decision below traces to at least one objective or constraint named in Section 4, cited explicitly rather than assumed. Not every trace carries equal weight — some choices were effectively forced by a constraint (an invalidated alternative, not merely a costlier one), while others were genuine judgment calls between viable options. This section marks that difference each time it applies, rather than labeling every choice a "trade-off" when some were not.
+
+Governance, testing/CI-CD, and deployment mechanics each have their own dedicated section later in this document (10, 8, and 9 respectively). This section treats them only at the level needed to explain the overall shape of the system; the operational depth belongs there, not here.
+
+## Scope
+
+**In scope for this section:** the design rationale behind the pipeline's major architectural decisions, each traced to a specific Section 4 objective or constraint, with design decisions explicitly distinguished from implementation detail and genuine trade-offs distinguished from forced necessities.
+
+**Out of scope for this section** (deferred to later sections):
+- The diagnostic process that led to specific corrections (e.g., the Stage 1 v2 severity-timing fix) — Section 6
+- The full governance layer (all 8 tables, locked decisions, policy checks) — Section 10
+- The full testing and CI/CD detail — Section 8
+- Deployment specifics (live providers, the actual storage-provider swap execution) — Section 9
+
+## Outputs
+
+### The Five-Layer Architecture
+
+README_portfolio.md's own architecture diagram names five layers: a data layer (object storage plus DuckDB), an inference layer (the REST API), a presentation layer (the dashboard), a governance layer (the eight audit tables), and a CI/CD layer (the GitHub Actions pipeline). This section uses that same five-layer shape, since it is the system's own documented self-description rather than a categorization imposed from outside.
+
+Three of the five get only summary treatment here because a dedicated section already covers their operational depth: governance in Section 10, CI/CD in Section 8, and the deployment specifics of where the data and inference layers actually run in Section 9. What follows is the full design rationale for the data and inference layers, and a brief note on why governance and presentation are shaped the way they are.
+
+### Design Decision 1 — SQL-First Computation Over a Swappable Storage Backend
+
+**Traces to:** Section 4's constraint that the nine-million-row lab measurement table is too large to load into R memory.
+
+**What was built:** All heavy aggregation — the computation behind the pipeline's 81 features — runs as SQL directly against Parquet files via DuckDB's httpfs extension, which registers cloud object storage as virtual SQL tables. The measurement data itself never enters R as an in-memory data frame; only the aggregated results do.
+
+**Why:** The constraint made an in-memory R workflow — the more typical R data-science pattern — infeasible at this data volume. Pushing computation into the database engine avoids the memory ceiling entirely, rather than working around it with chunking or sampling.
+
+**Trade-off:** this is not a cost-free choice. SQL-first computation is less interactive than an in-memory data frame — exploratory analysis requires writing SQL rather than piping through familiar R verbs, and it demands SQL fluency alongside R fluency. The pipeline accepts this cost in exchange for a data volume ceiling that would otherwise make the nine-million-row table unusable in R at all.
+
+**A downstream consequence, not an independently-traced decision:** because computation already happens through SQL against Parquet-by-URL rather than through R code that assumes a specific file location or vendor SDK, the storage backend itself becomes a configuration detail rather than an architectural assumption — `global_config.R` is described as provider-agnostic for exactly this reason. This is a benefit of Design Decision 1, not a second decision independently justified by its own Section 4 trace; the actual provider swap (MinIO to Backblaze B2, the six environment variables) is deployment mechanics, covered in Section 9.
+
+### Design Decision 2 — Synthesize Rather Than Train Directly on the 100-Patient Source
+
+**Traces to:** Section 4's constraint that real source data is limited to 100 patients, with credentialed access to the full MIMIC-IV not obtained in this phase.
+
+**What was built:** The 100 real patients are reshaped into four canonical tables (person, visit, condition, measurement) and synthesized up to 15,000 patients using `synthpop`'s CART algorithm for demographic and visit attributes, bootstrap resampling from real inter-admission gaps for visit timing, empirical frequency resampling for diagnosis codes, and capped vectorized resampling for lab measurements.
+
+**Why:** 100 patients is too small a population to learn patterns that only emerge at scale — the source material's own framing is that a model trained on 100 patients is comparable to a doctor who has only ever seen 100 patients. Synthesis responds to that specific limitation; it is not a general preference for synthetic data.
+
+**The governing design principle:** preserve the real data's statistical properties rather than invent new ones. The synthesized population's 20.06% readmission rate matches the real source's 20.1% — evidence that the synthesis extrapolated mathematically from what the 100 real patients actually showed, rather than fabricating a plausible-looking number.
+
+**The same fact as a Section 4 constraint, seen from the other side:** synthetic data built from a 100-patient source cannot exceed the information that source contains. This is the same signal ceiling Section 4 names as the direct cause of the model's modest AUC-ROC — not repeated in full here, since Section 4 already covers it, but the two are the same underlying fact viewed from opposite ends: there, a limit on what the model could learn; here, a limit on what the architecture could responsibly synthesize.
+
+**Deferred, not detailed here:** the specific mechanism by which visit timing and diagnosis severity were later linked (the shared latent "is_severe" variable) was a correction made during the build process, not part of the original design — it belongs to Section 6's diagnostic narrative, not to this section's account of the initial architecture.
+
+### Design Decision 3 — Preventing Data Leakage Through Split Design
+
+**Traces to:** Section 4's constraint that MIMIC-IV de-identifies by shifting each patient's dates by a random, patient-specific offset.
+
+**What was built:** two related choices, both aimed at the same failure mode — a model that appears to perform well because it was tested on information it shouldn't have had. First, the train/test split is performed at the patient level (`rsample::group_initial_split()` on `subject_id`), verified by checking for zero patient-ID overlap between the two sets — not at the record level or by date. Second, `is_deceased` is explicitly excluded as a predictor.
+
+**Why:** date-shifting is applied independently per patient, so one patient's shifted dates are not comparable to another's — a temporal split (train on earlier dates, test on later ones) would compare dates that don't correspond to the same calendar time across patients, making it methodologically meaningless rather than merely suboptimal. `is_deceased` is excluded because death is a future fact relative to any earlier hospital visit: a discharging clinician cannot know at discharge whether a patient will die at some later point, so a model trained to use that information would be learning from data no real deployment could ever supply at prediction time.
+
+**Not a trade-off — a forced choice.** Unlike Design Decision 5 below, this is not a case of weighing two viable options against each other. The alternative — a temporal split — was invalidated by the de-identification method itself, not merely less desirable. This document distinguishes the two because treating every design choice as a trade-off would understate how directly some decisions follow from a constraint that leaves no real alternative.
+
+**Implementation detail, not itself the design decision:** the specific split ratio (80% train — 12,000 patients; 20% test — 3,000 patients) is a parameter choice within this design, not a separate structural decision.
+
+### Design Decision 4 — Testable-by-Design API Architecture
+
+**Traces to:** Section 4's actual objective, which names "testable REST API design" directly among the skills the project exists to demonstrate.
+
+**What was built:** the API's business logic lives in plain R functions (the `*_core()` pattern); the Plumber decorators that expose them as HTTP routes are thin wrappers around those functions.
+
+**Why:** if request-handling logic and business logic are the same code, testing that logic requires running an HTTP server and making real requests against it — slower, harder to isolate, and harder to run as part of an automated suite. Separating the two lets the API-related tests (part of the 71-test suite) call the underlying functions directly, without a server in the loop.
+
+**Trade-off:** the separation adds a layer of indirection that a smaller, untested prototype wouldn't need — every route has a corresponding core function to maintain in parallel. The pipeline accepts this added structure in exchange for an API whose correctness is verified automatically rather than only by manual inspection.
+
+**Implementation detail:** loading the model once at process startup, rather than per-request, is a performance choice within this architecture, not the design decision itself.
+
+### Design Decision 5 — Interpretable Retrieval Over Semantic Depth
+
+**Traces to:** Section 4's actual objective, which names "RAG system design from scratch without new packages" directly, and the honest-disclosure objective, since an auditable retrieval method is what makes a discharge recommendation's sourcing checkable rather than merely asserted.
+
+**What was built:** clinical-guideline retrieval uses a hybrid of TF-IDF cosine similarity (40%), keyword density (30%), and ICD-code metadata overlap (30%), implemented in base R with no additional retrieval package. A template-based fallback generates a discharge summary without calling the Gemini API at all, so the pipeline continues to function if that external service is unavailable.
+
+**Why:** TF-IDF is dependency-free and its results are directly traceable to term overlap — a clinician or auditor can see exactly why a given guideline chunk was retrieved. This serves the same governance and honesty commitments Section 4 documents elsewhere: a retrieval mechanism that can be inspected is one whose claims can actually be checked, not just trusted.
+
+**The trade-off is stated directly in the source material, not inferred here.** The project's own roadmap section names the limitation explicitly: because TF-IDF works by matching shared terms, a clinical guideline that describes the same underlying concept in different wording than the patient's diagnosis codes could be missed entirely — a failure mode a semantic embedding model wouldn't have, at the cost of adding a dependency and losing some of TF-IDF's transparency. The design decision knowingly accepted that risk in exchange for interpretability and zero new dependencies, with the upgrade path already identified for a future phase.
+
+### Governance as a First-Class Layer, Not an Add-On
+
+**Traces to:** Section 4's actual objective, which names "governance, fairness, honest metrics, audit trails" among the skills demonstrated, and the honest-disclosure objective directly — honesty that can't be checked is only an assertion.
+
+README_portfolio.md's architecture diagram places a governance layer alongside the data, inference, and presentation layers, not beneath or after them — eight append-only DuckDB tables record every ingestion, feature definition, model training run, fairness stratification, RAG index build, LLM call, and prediction, with patient identifiers and raw inputs stored only as hashes. Placing governance at this level, architecturally equal to the layers that do the pipeline's actual work, is itself the design decision: an audit trail bolted on after the fact would sit outside the system's normal data flow and could be skipped; a governance write built into each stage's own code cannot be.
+
+One design implication worth naming, though the source material doesn't frame it in these terms directly: hashing protects patient privacy in the audit trail, but by the same construction it also means the audit trail cannot later be used to inspect what the actual input values were — only that a call happened, with what shape of input. That is a reasonable consequence of the hashing choice, noted here as an implication of the design rather than a claim the source material states outright.
+
+The eight tables individually, the locked-decisions document, and the six-policy check engine are covered in full in Section 10; this section establishes only why governance sits where it does in the architecture.
+
+### The Presentation Layer, Briefly
+
+The dashboard (Shiny, shinydashboard, Plotly, and DT across five reactive tabs) is architecturally the pipeline's fourth layer, and its design is comparatively simple relative to the decisions above: it reads a pre-computed governance snapshot for static content and makes live calls to the Railway API for patient-specific predictions, rather than connecting to DuckDB directly. This traces to the same actual objective as the rest of the system — a "complete ML lifecycle" demonstration needs a way for a non-technical audience to see the system work, which is the same dual-audience framing presentation_nontechnical.md itself is built around. The specific hosting mechanics of this layer belong to Section 9.
+
+### Traceability Summary
+
+| Design Decision | Traces to (Section 4) |
+|---|---|
+| SQL-first computation; swappable storage as a consequence | Constraint: nine-million-row memory limit |
+| Synthesize rather than train directly on 100 patients | Constraint: 100-patient source limit |
+| Patient-level split; exclude `is_deceased` | Constraint: MIMIC-IV date-shifting |
+| Testable-by-design API (`*_core()` pattern) | Actual objective: "testable REST API design" |
+| TF-IDF hybrid retrieval, no new packages | Actual objective: "RAG system design... without new packages"; honest-disclosure objective |
+| Governance as a first-class architectural layer | Actual objective: "governance... audit trails"; honest-disclosure objective |
+| Presentation layer's live-plus-static hybrid | Actual objective: complete-lifecycle demonstration |
+
+## Acceptance Criteria
+
+1. Every design decision discussed traces explicitly to at least one Section 4 objective or constraint, cited by name.
+2. Each decision states why it was made, not only what was built — a bare tech-stack list would fail this criterion even if technically accurate.
+3. Design decisions are explicitly distinguished from implementation details throughout, not blended.
+4. Where a genuine trade-off exists, it is stated plainly; where a choice was effectively forced by an invalidated alternative rather than a costlier one, that distinction is made rather than calling it a trade-off by default.
+5. No technology, package, or architectural claim appears that isn't supported by `project_summary.md`, `presentation_nontechnical.md`, or `README_portfolio.md`.
+6. Content that belongs to a later section (governance depth, testing/CI-CD depth, deployment mechanics) is deferred explicitly rather than duplicated here.
+
+## Verification Checklist
+
+- [x] A traceability table maps every design decision to its Section 4 origin
+- [x] Each Design Decision subsection states rationale (why), not just composition (what)
+- [x] Implementation-detail callouts are marked distinctly from design-decision rationale throughout
+- [x] At least one genuine, source-stated trade-off (TF-IDF vs. embeddings) and at least one forced-not-traded choice (patient-level split) are both present and explicitly distinguished
+- [x] No technology or claim appears without a citation to one of the three authoritative documents
+- [x] Governance, testing/CI-CD, and deployment depth are explicitly deferred rather than duplicated
+- [ ] Confirmed by Kingsley before Section 6 begins
+
+---
+
+**Section 5 of 12 drafted. Pending confirmation before Section 6 begins.**
 
 ---
 
