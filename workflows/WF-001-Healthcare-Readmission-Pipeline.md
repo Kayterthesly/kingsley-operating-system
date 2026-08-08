@@ -1,7 +1,7 @@
 # WF-001 — Healthcare Readmission Pipeline: Operating Model & Reusable Engineering Workflow
 
 Version: Not yet assigned — versioning begins at 0.1 upon first complete pass through every planned section (WF-000 §5.1)
-Status: In Progress — Sections 1–7 approved; Section 8 drafted, pending confirmation
+Status: In Progress — Sections 1–9 approved; Section 10 drafted, pending confirmation
 Author: Kingsley Akenu
 Architect: Claude
 Last Updated: 2026-08-06
@@ -21,8 +21,8 @@ Registry Cross-Reference: WF-000 §3, Artifacts 5–7 (Healthcare Pipeline — G
 6. Engineering Process — Build Sequence & Diagnostic Discipline — **drafted, pending confirmation**
 7. Success Metrics, Fairness & Honest Evaluation — **approved**
 8. Testing & CI/CD Verification — **drafted, pending confirmation**
-9. Deployment & Live Operations — pending
-10. Governance & Monitoring Integration — pending
+9. Deployment & Live Operations — **approved**
+10. Governance & Monitoring Integration — **drafted, pending confirmation**
 11. Reusable Engineering Patterns — The Operating Model for WF-002–WF-006 — pending
 12. Relationship to WF-000 & Compliance Audit — pending
 
@@ -746,23 +746,244 @@ The relationship the source material directly supports is this: local test runs 
 - [x] The "unit tests" CI-step label versus "71 tests run in CI" statement is flagged as an unresolved precision gap
 - [x] The local-vs-CI environment question is stated as an unaddressed gap, not filled with outside knowledge
 - [x] Candidate material for Section 11 is present and appropriately deferential
-- [ ] Confirmed by Kingsley before Section 9 begins
+- [x] Confirmed by Kingsley before Section 9 begins
 
 ---
 
-Section 8 of 12 complete. Approved 2026-08-06.
+**Section 8 of 12 complete. Approved 2026-08-06.**
 
 ---
 
 # 9. Deployment & Live Operations
 
-*Pending. Will document where the system runs and the provider-agnostic storage design, cross-referenced to WF-000 §3 Artifacts 5–7.*
+## Purpose
+
+Section 9 documents where the pipeline actually runs, how it got there, and what that establishes — distinct from Section 5's account of why the architecture was designed the way it is, and distinct from Section 8's account of what the automated test suite verifies before code is considered mergeable. Deployment is a third thing: the fact of a system being live and reachable, treated here as its own category with its own evidentiary boundaries, rather than as a natural consequence of good architecture or passing tests.
+
+The central discipline of this section is a boundary already established in Sections 4 and 7 and reaffirmed here rather than re-derived: this pipeline being deployed and reachable does not make it production-ready or clinically ready. Those are different claims, and the source material itself keeps them separate — the disclaimer appears not only in documentation but in the live API's own response payload. This section preserves that separation rather than letting "it's live" quietly imply "it's ready."
+
+## Scope
+
+**In scope for this section:** deployment targets and infrastructure, API and dashboard deployment specifically, the deployment workflow and its relationship to the CI/CD gate documented in Section 8, live operational boundaries, and what deployment does and does not establish about readiness.
+
+**Out of scope for this section** (deferred to other sections):
+- Why the architecture was designed as it was — Section 5
+- What the automated test suite verifies — Section 8
+- The governance tables' structure and the monitoring script's mechanics — Section 10
+- Model performance, approval, and fairness — Section 7
+
+## Outputs
+
+### Deployment Targets and Infrastructure
+
+Three live targets are documented, each already registered in WF-000 §3 (Artifacts 5–7) with its own canonical source and sync trigger: the GitHub repository, the live dashboard, and the live API. This section adds the rationale and operational narrative those registry entries deliberately exclude, per WF-000 §3's own acceptance criteria that a registry row describes a triggering condition, not synchronization mechanics.
+
+**The three registered targets:**
+
+| Target | Platform | What Runs There | WF-000 Registration |
+|---|---|---|---|
+| GitHub Repository | `github.com/Kayterthesly/r-healthcare-readmission` | Source code and version history | Artifact 5 |
+| Dashboard | shinyapps.io | A five-tab Shiny application — Pipeline Overview, Patient Risk, Model Performance, Fairness Analysis, Governance Monitor | Artifact 6 |
+| API | Railway (Docker container) | Four Plumber endpoints — `/health`, `/predict`, `/explain`, `/rag/summary` | Artifact 7 |
+
+**Storage infrastructure supporting them** — not separately registered in WF-000 §3; documented here because it supports the API and dashboard above, not as a fourth registered target:
+
+| Storage | Platform | Role |
+|---|---|---|
+| Production | Backblaze B2 | Nine Parquet files, 82 MB, S3-compatible |
+| Local development | MinIO (Docker) | The same schema, used during development per Section 5's Design Decision 1 |
+
+`Dockerfile` and `railway.toml` are named in the repository structure as the Railway-specific deployment configuration; their contents are not described further in the source material beyond their stated purpose.
+
+### API Deployment
+
+The API is deployed to Railway as a Docker container, reachable at `r-healthcare-readmission-production.up.railway.app`. Its `/health` endpoint reports status, model version, index version, a timestamp, and the list of available endpoints — a directly-callable way to verify the deployment is live, demonstrated in `README_portfolio.md`'s own quick-test example (`curl .../health`).
+
+Every `/predict` response — including the example shown in the API reference — carries a `disclaimer` field reading "FOR PORTFOLIO DEMONSTRATION ONLY — NOT FOR CLINICAL USE." This is worth naming precisely because of where it appears: not only in README prose, which a user could reasonably skip, but in the payload of the live system's own response, which any caller — human or automated — receives on every call. That is a stronger form of disclosure than documentation alone, and it is treated as a stated fact here because it appears in the API reference's own example output, not because this document infers it should be there.
+
+One implementation detail, not itself a deployment decision: the model is loaded once at process startup rather than per-request, a design choice already documented in Section 5.
+
+### Dashboard Deployment
+
+The dashboard is deployed to shinyapps.io using what the source material describes as a pre-computed static bundle — a governance snapshot — for its non-patient-specific content, combined with live `httr2` POST calls to the Railway API for patient-specific predictions. It does not connect to DuckDB or read local files at runtime; per the source material, this was a deliberate choice specifically so the deployed dashboard has no dependency on the pipeline's local data infrastructure.
+
+One boundary of the provider-agnostic design principle established in Section 5 is worth stating precisely rather than assuming it holds everywhere: the dashboard's connection to the Railway API is described as a hardcoded URL, not a configuration value. Section 5's swappable-storage design applies to the data layer specifically; nothing in the source material indicates the same swappability was extended to the dashboard's connection to the API. This is not a criticism — the source material gives no indication the URL needed to change — but it is a distinct fact from the data layer's portability, and this document does not blur the two.
+
+### Deployment Workflow: Automated versus Manual
+
+The API and the dashboard are deployed through genuinely different workflows, and this section keeps that distinction explicit rather than describing "deployment" as one uniform process.
+
+**The API:** `README_portfolio.md` states that Railway auto-deploys on push to `main`, triggered by `git push origin main` — an automated, push-triggered mechanism.
+
+**The dashboard:** deployment is an explicit, manually-run command — `rsconnect::deployApp(appDir = "dashboard", appName = "healthcare-readmission-pipeline", account = "your-shinyapps-account")` — described under its own "Deploy Dashboard to shinyapps.io" heading, distinct from the API's automated path. Nothing in the source material describes the dashboard's deployment as triggered by a push event.
+
+### The Relationship Between Deployment and the CI/CD Gate — An Open Evidence Gap
+
+Section 8 documents a nine-step GitHub Actions pipeline that runs on push to `main` and blocks on failure. This section's API deployment is also described as triggered by push to `main`, via Railway's own auto-deploy. Both are real, stated facts. What is not established by the source material is how the two relate to each other.
+
+The CI/CD slide's own diagram ends in a checkmark labeled "Deploy," which could be read as the CI workflow's actual final action — meaning Railway's deployment is gated by the nine checks completing successfully. But the technical enumeration of the nine steps, given separately in the same source material, stops at "unit tests" and does not name a deploy step explicitly; and the API's own deployment instructions describe Railway's auto-deploy as its own mechanism, triggered by the push event itself, without stating that it waits on the GitHub Actions workflow's result. Both readings are consistent with what's written; neither is confirmed by it. This document does not resolve the ambiguity by choosing the more reassuring interpretation — that a failing test run always prevents a live deployment — because the source material does not state that connection explicitly. It is recorded here as an open evidence gap, not as an established safeguard.
+
+### Live Operational Boundaries
+
+The source material states a sub-two-second response target for a live prediction and discharge recommendation together, presented as a headline characteristic of the deployed system rather than as a benchmark with a described testing methodology attached — this document reports it as a stated claim in the source material, not as independently verified here.
+
+Beyond reachability and that stated latency figure, the source material does not describe uptime guarantees, a service-level agreement, load-testing results, or rate-limiting behavior for either the API or the dashboard. These are not claimed as failures of the deployment; they are simply not addressed in the three authoritative documents, and this document notes their absence rather than assuming a typical production posture on the deployment's behalf.
+
+### What Deployment Establishes — and Does Not
+
+| Deployment Establishes | Deployment Does Not Establish |
+|---|---|
+| The API and dashboard are reachable over the internet at stated URLs, and the API's `/health` endpoint reports itself as operational | Clinical readiness — explicitly and repeatedly disclaimed, including in the API's own response payload |
+| A sub-two-second response time is claimed for the live prediction-and-recommendation flow | That this figure has been independently verified, load-tested, or measured under production-scale traffic — the source material states it without a described methodology |
+| The API has an automated, push-triggered deployment path (Railway); the dashboard has an explicit manual one (`rsconnect::deployApp`) | That the API's automated deployment is gated by Section 8's CI checks passing — see the open evidence gap above |
+| The dashboard operates independently of the pipeline's local data infrastructure at runtime | Uptime, an SLA, load-testing results, or rate-limiting behavior — none of these are addressed in the source material for either target |
+
+### Relationship to WF-000's Registry
+
+WF-000 §3 already registers the GitHub repository, the live dashboard, and the live API as Artifacts 5, 6, and 7 respectively, each with its own canonical source (the live deployment itself) and sync trigger ("redeploy, or the service is moved or retired"). This section does not re-register these artifacts or restate their sync mechanics — per WF-000 §6.4, WF-001 cannot override that machinery, and per Section 2's inheritance statement, it doesn't need to. What this section adds is the narrative context WF-000's own acceptance criteria deliberately excluded from the registry rows themselves: why these targets, why this workflow, and what the deployment facts do and do not establish. If any of these three artifacts is ever moved or retired, that event is a Registry Change under WF-000 §4's trigger taxonomy, handled through WF-000's own Verification Workflow — not through an amendment to this section.
+
+### Candidate Material for Section 11
+
+- The observation that different components of one system can warrant genuinely different deployment automation — the API's push-triggered path and the dashboard's manual one are both reasonable, but they are different, and a future project should choose deliberately which components need which workflow rather than assume uniformity.
+- The finding that a portability principle established for one layer (Section 5's swappable storage) does not automatically extend to every other connection in the system (the dashboard's hardcoded API URL) — a caution against assuming a design property generalizes further than it was actually built to.
+- Embedding a use-boundary disclaimer directly in a live system's own response payload, not only in its documentation, as a stronger and harder-to-miss form of disclosure — directly extending the honest-disclosure discipline from Sections 4, 6, and 7 into operational, not just documentary, practice.
+- The general lesson from the CI/deploy relationship gap: when two automated systems trigger on the same event, their relationship — sequenced, gated, or independent — needs to be explicitly designed and documented, not left to be inferred from the fact that they happen to share a trigger.
+
+## Acceptance Criteria
+
+1. Deployment targets, API deployment, and dashboard deployment are each documented with citations to the source material, with no claim about their contents beyond what's stated.
+2. The API's automated deployment workflow and the dashboard's manual one are kept explicitly distinct, not described as one uniform "deployment process."
+3. The relationship between Railway's auto-deploy and Section 8's CI/CD gate is stated as an open evidence gap, not resolved by assuming the more reassuring reading.
+4. Live operational claims (the sub-two-second response figure) are reported as stated claims from the source material, not independently verified or treated as confirmed benchmarks.
+5. Deployment is explicitly distinguished from production-readiness and clinical-readiness throughout, reinforcing the boundary established in Sections 4 and 7 rather than letting "live" imply "ready."
+6. WF-000 §3's existing registration of these three artifacts is referenced, not re-derived or duplicated.
+7. Architectural rationale (Section 5), testing verification (Section 8), and governance-table depth (Section 10) are not duplicated here.
+8. Candidate material for Section 11 is flagged without performing Section 11's formal extraction here.
+
+## Verification Checklist
+
+- [x] Deployment targets and infrastructure are documented with source citations, with unknown details (Dockerfile/railway.toml contents) noted as unknown rather than assumed
+- [x] API and dashboard deployment workflows are kept explicitly distinct — automated versus manual
+- [x] The Railway-auto-deploy-versus-CI-gate relationship is stated as an open evidence gap, not silently resolved
+- [x] The sub-two-second response claim is attributed to the source material as a stated claim, not treated as independently verified
+- [x] "Deployed" is never equated with "production-ready" or "clinically ready" anywhere in this section
+- [x] WF-000 §3's registration of Artifacts 5–7 is referenced by citation, not restated or duplicated
+- [x] No content duplicates Section 5's design rationale, Section 8's testing verification, or Section 10's governance-table depth
+- [x] Candidate material for Section 11 is present and appropriately deferential
+- [x] Confirmed by Kingsley before Section 10 begins
+
+---
+
+**Section 9 of 12 complete. Approved 2026-08-06.**
 
 ---
 
 # 10. Governance & Monitoring Integration
 
-*Pending. Will document the pipeline's internal governance layer and disambiguate it from WF-000's identity-stack governance.*
+## Purpose
+
+Section 10 documents the pipeline's own internal governance and monitoring system — the eight append-only DuckDB tables that record its operational history, the locked-decisions document that records its governance rules, the monitoring script that reads both, and the policy checks that enforce them. This is distinct from every prior section that touched governance in passing: Section 5 established governance as an architecturally first-class layer without detailing its contents; Section 7 evaluated the fairness *finding* the governance layer recorded, not the recording mechanism itself; Section 8 verified that the governance write functions behave correctly in tests, not what they write or why. This section is where the layer itself — its tables, their structure, and what they can and cannot be trusted to show — gets documented in full for the first time.
+
+The central discipline carried forward from Section 2 is a terminology boundary this section depends on holding: "governance," in this document, means two different things depending on which system is meant. WF-000's governance concerns identity-artifact consistency — drift, canonical sources, approval authority. This section's governance concerns the pipeline's own audit trail, policy enforcement, and monitoring — a property of the system being documented, not of this document's own oversight. The two do not merge here.
+
+## Scope
+
+**In scope for this section:** the eight governance tables — what each records and why — the locked-decisions document as distinct from the tables, the monitoring layer and what it can and cannot currently demonstrate, the policy-check mechanism at the level needed to complete this picture, and what the governance/monitoring layer establishes versus does not establish.
+
+**Out of scope for this section** (covered elsewhere, not duplicated here):
+- System architecture and why governance sits where it does structurally — Section 5
+- The fairness finding itself and what it means — Section 7
+- Test verification of the governance write functions — Section 8
+- Deployment infrastructure — Section 9
+
+## Outputs
+
+### The Eight Governance Tables
+
+Per Section 3's established finding, the pipeline maintains eight governance tables — not seven, the figure `presentation_nontechnical.md` states once and Section 3 classified as Drifted against the other two authoritative documents, which name all eight directly and consistently.
+
+| Table | Records | Write Pattern | Populated From |
+|---|---|---|---|
+| `ingest_metadata` | Every canonical table upload — job ID, data hash, sensitivity label, operator, timestamps | Append-only, with a PHI gate | Stage 2 |
+| `feature_registry` | Every computed feature, with a leakage note per entry | Idempotent by feature name and version | Stage 3 |
+| `model_registry` | Every training run, across all versions and metrics | Append-only — no version is overwritten | Stage 4 |
+| `fairness_reports` | Recall and precision by subgroup, one row per subgroup | Append-only | Stage 5 |
+| `rag_chunks` | The indexed guideline chunks | Overwritten on index rebuild | Stage 6 |
+| `rag_index_metadata` | Index build provenance — when and how the index was built | Append-only, each rebuild traceable | Stage 6 |
+| `llm_call_log` | Every LLM call, request and response stored as hashes | Append-only | Stages 6–7 |
+| `predictions_audit` | Every `/predict` call — patient ID hash, input hash, model version, risk score, risk tier, trace ID, environment | Append-only | Stage 7 |
+
+Two of the tables — `llm_call_log` and `predictions_audit` — are reported with different row counts across `project_summary.md` (3+ and 1+, respectively) and `README_portfolio.md` (8+ and 15+, respectively). Both figures are qualified with "+" in both documents. Given both tables are append-only and accumulate rows through ongoing use, this reads as two snapshots taken at different points in the pipeline's operation, not a contradiction — the same reasoning already applied to similarly qualified figures during the original evidence review. This document does not treat it as a new finding requiring Section 3-style classification.
+
+`fairness_reports`, specifically, has a human-readable counterpart distinct from the table itself: a markdown report (`models/artifacts/fairness_report_xgboost_v3.md`), described in the source material as containing the fairness stratification detail Section 7 evaluated. The table and the report are not the same artifact — the table is the structured, queryable log; the report is the written summary derived from it.
+
+Seven write functions, documented in `r_scripts/governance_helpers.R`, populate these eight tables. The source material does not specify which function writes to which table, or whether one function writes to more than one table — this document notes that as an unaddressed implementation detail rather than assuming a specific one-to-one mapping that isn't stated.
+
+### Locked Decisions, Distinguished from Governance Tables
+
+The pipeline's `docs/00_locked_decisions.md` is a separate artifact from the eight governance tables, and Section 2's glossary already draws this distinction formally: a Locked Decision is a governance *determination* — a rule about what a flag means, what threshold applies, what counts as acceptable — while a Governance Table is an operational *record* of what actually happened. The recall-floor certification boundary discussed at length in Section 7 (`approved = TRUE` certifies Recall ≥ 0.85 only) is a Locked Decision. The `model_registry` row logging a specific training run's actual recall value is a Governance Table entry. One states the rule; the other records an instance.
+
+The source material describes the locked-decisions document as containing 13 sections, enforced in part by the policy-check mechanism described below. Its specific contents beyond what Sections 4 and 7 have already cited — the recall-floor scope, the gameable-gate disclosure — are not elaborated further in the three authoritative documents, and this document does not reconstruct the remaining sections from inference.
+
+### The Monitoring Layer
+
+`r_scripts/08_monitoring.R` reads all eight governance tables and produces a timestamped health report, written to `logs/`. Per the source material, it computes four things: model health (the count of approved models and each one's recall-gate status), prediction volume together with Population Stability Index drift, a fairness summary, and LLM call statistics — alongside a governance-completeness check across the eight tables.
+
+The PSI drift mechanism is worth treating precisely rather than as a single fact, because the source material itself reports two different things about it that should not be collapsed into one. First, the *mechanism* is built and documented: PSI thresholds are defined (below 0.10 is stable, 0.10 to 0.25 warrants investigation, above 0.25 warrants retraining), and the monitoring script is described as computing it. Second, and separately, an actual monitoring report excerpt in the source material shows the drift result as "insufficient data," with a stated minimum of 30 predictions needed for a reliable PSI estimate, and the framework described as "ready" rather than as having produced a validated reading. The mechanism existing and the mechanism having been exercised against enough real data to say anything are two different claims. This document states only the first as established; the second — that PSI drift detection actually works as intended on live traffic — is not something the source material demonstrates, because the volume threshold for a reliable estimate had not yet been reached at the time of the reported snapshot.
+
+Beyond this, the source material does not describe uptime alerting, automated anomaly notification, alert routing to a person or system, an incident-response process, or a data-retention policy for the governance tables. These are not claimed as absent from the actual system — only as unaddressed in the three authoritative documents, which is the boundary this document is limited to.
+
+### Policy Checks
+
+The six-policy check (`infra/policies/model_policy_check.R`) — approved model, recall gate, leakage notes, decisions-document sections, metadata JSON schema, and required scripts — is already named in Sections 6 and 8 as part of the CI/CD gate's enforcement mechanism. It is not re-derived here; its role in this section is only to complete the picture of how the governance layer connects to enforcement: the policy check reads the same locked-decisions document and touches several of the same governance tables documented above — the recall gate reads `model_registry`; the leakage-notes check reads `feature_registry`.
+
+### What the Governance/Monitoring Layer Establishes — and Does Not
+
+| The Governance/Monitoring Layer Establishes | It Does Not Establish |
+|---|---|
+| Every ingestion, feature, training run, fairness stratification, RAG index build, LLM call, and prediction is logged, with patient data and raw inputs stored only as hashes | Clinical governance or regulatory approval — this remains a portfolio demonstration, and no volume of internal audit logging changes that status |
+| A drift-monitoring mechanism (PSI) is built, with defined thresholds | That drift monitoring has been validated against enough live traffic to say it works as intended — the source material reports insufficient data for a reliable estimate as of the reported snapshot |
+| The `fairness_reports` table records the 87-percentage-point race disparity Section 7 evaluated, as one of 19 logged subgroup rows | That the disparity is acceptable, resolved, or explained with certainty — a table recording a finding is not the finding being acceptable; Section 7's fact/inference/limitation triage on that finding still holds |
+| A six-policy check enforces specific, named invariants against the locked-decisions document and specific governance tables | Uptime alerting, anomaly notification routed to a person, incident response, or a stated data-retention policy — none of these are addressed in the source material |
+
+### Pipeline Governance versus WF-000 Governance
+
+Section 2 already drew this boundary and it is reaffirmed rather than re-derived here: everything documented above — the eight tables, the locked-decisions document, the monitoring script, the policy checks — is Process Artifact-level content in WF-000's sense, internal to the pipeline's own operation, not itself an identity-stack claim WF-000 governs. It becomes subject to WF-000 §4's Drift Detection only at the point a specific figure from it is restated externally as a public claim — the AUC-ROC 0.566 quoted on a resume, for instance, not the `model_registry` row it came from. This section's own content does not require WF-000 registration; it documents a system, not a claim WF-000's registry tracks.
+
+### Candidate Material for Section 11
+
+- The distinction between a governance mechanism *existing* (PSI drift detection, built and threshold-defined) and a governance mechanism *proven in operation* (requiring sufficient real data, not yet reached) — a general caution against treating "the monitoring is built" as equivalent to "the monitoring works," applicable to any system with a similar cold-start data requirement.
+- The Locked Decision / Governance Table distinction itself — separating a rule about what a result means from the record of the result — as a reusable documentation discipline for any project with both a governance policy and an operational audit trail.
+- The observation that a governance table recording a finding is not the same as the finding being acceptable, applied here to fairness specifically but stated as a general principle: logging is not evaluation, and the two should not be allowed to imply each other.
+- The append-only-versus-overwrite design choice varying by table (`rag_chunks` overwrites on rebuild; every other table is append-only) — a reminder that a uniform "log everything, always" policy isn't always the right choice; the write pattern should match what the specific data actually needs to preserve.
+
+## Acceptance Criteria
+
+1. All eight governance tables are documented individually — what each records, its write pattern, and which stage populates it — with the seven-versus-eight table count treated per Section 3's established finding, not revisited.
+2. Locked Decisions and Governance Tables are kept explicitly distinct throughout, per Section 2's definitions, with a concrete example of each.
+3. The PSI drift-monitoring mechanism's existence is distinguished explicitly from its having been validated against sufficient live data — the two are not collapsed into one claim.
+4. No claim states or implies that the governance layer constitutes clinical governance, regulatory approval, or evidence that the recorded fairness disparity is acceptable.
+5. Monitoring capabilities not addressed in the source material — alerting, anomaly routing, incident response, retention policy — are identified as gaps, not filled from general MLOps practice.
+6. Content already covered in Sections 5, 7, 8, and 9 is cross-referenced, not duplicated.
+7. The boundary between pipeline governance and WF-000 governance, established in Section 2, is reaffirmed rather than re-argued.
+8. Candidate material for Section 11 is flagged without performing Section 11's formal extraction here.
+
+## Verification Checklist
+
+- [x] All eight governance tables are individually documented with write pattern and populating stage
+- [x] The seven-versus-eight count is handled per Section 3's finding, with no new investigation opened
+- [x] Locked Decision and Governance Table are kept explicitly distinct, each with a concrete example
+- [x] The PSI mechanism's existence and its unvalidated-against-sufficient-data status are both stated, not merged into one claim
+- [x] No sentence states or implies clinical governance, regulatory approval, or that the fairness disparity is resolved
+- [x] Unaddressed monitoring capabilities (alerting, incident response, retention) are named as gaps
+- [x] Sections 5, 7, 8, and 9 content is cross-referenced, not restated
+- [x] The pipeline-governance/WF-000-governance boundary from Section 2 is reaffirmed, not re-derived
+- [x] Candidate material for Section 11 is present and appropriately deferential
+- [ ] Confirmed by Kingsley before Section 11 begins
+
+---
+
+**Section 10 of 12 drafted. Pending confirmation before Section 11 begins.**
 
 ---
 
