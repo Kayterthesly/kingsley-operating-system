@@ -1,7 +1,7 @@
 # WF-001 — Healthcare Readmission Pipeline: Operating Model & Reusable Engineering Workflow
 
 Version: Not yet assigned — versioning begins at 0.1 upon first complete pass through every planned section (WF-000 §5.1)
-Status: In Progress — Sections 1–9 approved; Section 10 drafted, pending confirmation
+Status: In Progress — Sections 1–10 approved; Section 11 drafted, pending confirmation
 Author: Kingsley Akenu
 Architect: Claude
 Last Updated: 2026-08-06
@@ -18,12 +18,12 @@ Registry Cross-Reference: WF-000 §3, Artifacts 5–7 (Healthcare Pipeline — G
 3. Evidence Base & Source Reconciliation — **approved**
 4. Objectives & Constraints — **approved**
 5. System Architecture & Design Rationale — **approved**
-6. Engineering Process — Build Sequence & Diagnostic Discipline — **drafted, pending confirmation**
+6. Engineering Process — Build Sequence & Diagnostic Discipline — **approved**
 7. Success Metrics, Fairness & Honest Evaluation — **approved**
-8. Testing & CI/CD Verification — **drafted, pending confirmation**
+8. Testing & CI/CD Verification — **approved**
 9. Deployment & Live Operations — **approved**
-10. Governance & Monitoring Integration — **drafted, pending confirmation**
-11. Reusable Engineering Patterns — The Operating Model for WF-002–WF-006 — pending
+10. Governance & Monitoring Integration — **approved**
+11. Reusable Engineering Patterns — The Operating Model for WF-002–WF-006 — **drafted, pending confirmation**
 12. Relationship to WF-000 & Compliance Audit — pending
 
 ---
@@ -979,17 +979,154 @@ Section 2 already drew this boundary and it is reaffirmed rather than re-derived
 - [x] Sections 5, 7, 8, and 9 content is cross-referenced, not restated
 - [x] The pipeline-governance/WF-000-governance boundary from Section 2 is reaffirmed, not re-derived
 - [x] Candidate material for Section 11 is present and appropriately deferential
-- [ ] Confirmed by Kingsley before Section 11 begins
+- [x] Confirmed by Kingsley before Section 11 begins
 
 ---
 
-**Section 10 of 12 complete. Approved 2026-08-06**
+**Section 10 of 12 complete. Approved 2026-08-06.**
 
 ---
 
 # 11. Reusable Engineering Patterns — The Operating Model for WF-002–WF-006
 
-*Pending. Will formally define the Engineering Pattern Extraction process — transforming the project-specific decisions documented in Sections 4–10 into named, reusable Engineering Patterns, per the Section 2 definitions, explicitly designed for reuse in WF-002 and future workflows. These patterns, together with the objectives, architecture, and governance recorded elsewhere in this document, constitute the Operating Model that future WF-00X workflows inherit as part of the Kingsley Operating System.*
+## Purpose
+
+Section 11 performs the formal extraction Section 2 named and Sections 6 through 10 each prepared for but explicitly declined to do themselves: converting the engineering reasoning documented elsewhere in this document into named, project-independent Engineering Patterns. The test applied throughout is the one posed directly for this section: does this reflect engineering reasoning reusable as a deliberate practice in another project, or does it merely describe how this particular healthcare pipeline happened to be built? Only candidates that clear this bar appear below as patterns; the rest are named explicitly as not surviving, in their own subsection, rather than silently dropped or forced in for the sake of a longer list.
+
+Sections 5 through 10's own "Candidate Material" content is treated here as raw material, not as pre-approved patterns. Several candidates that looked reasonable when first noted do not survive re-examination against this section's stricter bar, most often because the underlying observation turns out to be well-established software-engineering practice this project applied correctly, rather than something this project's own reasoning uniquely demonstrates.
+
+## Scope
+
+**In scope for this section:** formal extraction of Engineering Patterns from the candidate material identified in Sections 5 through 10, each stated as a distinct observed fact, the reasoning that fact demonstrates, and the generalized, project-independent pattern inferred from it; and an explicit account of candidates that did not survive the transferability test.
+
+**Out of scope for this section** (deferred to Section 12):
+- Auditing whether this section itself satisfies WF-000 §6.1's "template" characterization of WF-001 — that compliance check belongs to Section 12
+- Any correction to Master-CV.md or other flagged follow-up actions — Section 12's action items
+
+## Outputs
+
+Fourteen candidates survive the transferability test below, grouped by the kind of reasoning they generalize. Each is stated in three parts — the observed fact, the reasoning that fact demonstrates, and the pattern inferred from it — kept visibly distinct rather than blended into one description.
+
+### Group 1 — Diagnostic Discipline
+
+**Pattern A: Cross-Model Comparison as a Test for Spurious Signal**
+*Fact:* in Diagnostic Round 3 (Section 6), XGBoost assigned 30.6% of its total gain to one feature; glmnet, trained on the same data, assigned that feature a near-zero coefficient.
+*Reasoning:* the asymmetry between a flexible model and a simple one on the same feature was read as evidence the pattern was an artifact rather than a real relationship — confirmed by regularizing XGBoost and observing AUC hold constant.
+*Pattern:* when a flexible model shows unusually concentrated importance on one feature, check whether a simpler model trained on the same data corroborates it. A real signal should leave some trace in the simpler model; an artifact usually won't.
+
+**Pattern B: Root-Cause Investigation Across Stage Boundaries**
+*Fact:* in Diagnostic Round 2 (Section 6), a symptom appearing in Stage 4 (near-random AUC) was traced to a defect in Stage 1 (severity and timing generated independently).
+*Reasoning:* the investigation did not stop at "is my modeling code correct" — it extended backward to "is my upstream data correctly constructed."
+*Pattern:* when a symptom appears at one stage of a pipeline, treat every upstream stage as a legitimate suspect before concluding the defect is local to where the symptom surfaced.
+
+### Group 2 — Evaluation & Certification Discipline
+
+**Pattern D: Four Independent Evaluation Axes**
+*Fact:* this pipeline is simultaneously modest in performance, approved by its own governance gate, flagged (not cleared) on one fairness dimension, and fully disclosed on all three (Section 7).
+*Reasoning:* none of these four facts substitutes for any other — a summary reporting only "approved" would be true and substantively misleading.
+*Pattern:* evaluate an ML system's outcome along at least four independent axes — statistical performance, governance/approval status, fairness across relevant subgroups, and the honesty of the disclosure itself — and resist collapsing them into a single verdict.
+
+**Pattern E: Explicit Certification Scoping**
+*Fact:* the source material states directly that `approved = TRUE` certifies only the recall floor, not clinical utility, and separately that a recall-only gate is gameable by threshold manipulation (Section 7); this document extended the identical treatment to test results (Section 8: a passing suite certifies specified behaviors, not model quality or fairness) and to governance tables (Section 10: a table recording a finding is not the finding being acceptable).
+*Reasoning:* at every level of this pipeline, a verification or approval result is treated as certifying exactly what it checked and nothing more, with the gap between "passed" and "is actually good" stated rather than left for a reader to assume away.
+*Pattern:* for any metric, gate, test, or governance record, state explicitly what passing or existing actually certifies and what it does not — including naming the specific way the mechanism could be satisfied without the underlying goal being met — rather than letting a pass/fail result imply a broader endorsement it wasn't designed to give.
+
+**Pattern F: A Gate Nothing Has Ever Failed Is Serving a Different Function Than Selection**
+*Fact:* all six trained model versions cleared the Recall ≥ 0.85 floor; the actual driver of version-to-version iteration was the AUC-ROC diagnostic work, not the recall gate (Section 7).
+*Reasoning:* a threshold that has never rejected a candidate isn't discriminating between acceptable and unacceptable outcomes in practice — whatever its nominal purpose, its actual function is closer to a sanity check.
+*Pattern:* when reviewing a project's own governance gates, check whether the gate has ever actually failed anything. If not, its real function is a baseline sanity check, not a selection mechanism, and it should be understood — and possibly redesigned — accordingly.
+
+**Pattern L: Separate a Measured Disparity, Its Explanation, and the Evaluation's Own Blind Spots**
+*Fact:* the 87-percentage-point race gap is a directly measured result; the source material's own explanation for it — "most likely" thin representation, not learned discrimination — is explicitly hedged, not asserted as certain; and subgroups under 30 members are excluded from flagging entirely, a stated limitation of the evaluation method itself (Section 7).
+*Reasoning:* the source material keeps the measured gap, its candidate explanation, and the evaluation's coverage limit as distinguishable things — the hedge ("most likely") is the project's own language, not a label this document added afterward. The explicit three-way separation applied throughout this document is a formalization of that care, not a framing the source material states in exactly these terms.
+*Pattern:* when reporting a fairness or bias finding, keep the measured disparity, any causal explanation offered for it, and known blind spots in the measurement method itself visibly separate. A hedged explanation should stay hedged, and a documented coverage gap should stay visible, rather than either being smoothed into one confident-sounding summary.
+
+**Pattern M: Distinguish a Forced Choice From a Genuine Trade-off**
+*Fact:* this document treats the patient-level train/test split as forced (the alternative — a temporal split — was invalidated outright by MIMIC-IV's per-patient date-shifting, not merely worse) and the TF-IDF-versus-embeddings retrieval choice as a genuine trade-off (both options were viable; interpretability and zero new dependencies were chosen over stronger semantic retrieval, with the cost stated explicitly in the source material's own roadmap) (Section 5).
+*Reasoning:* describing both as "trade-offs" would understate how directly the split decision follows from a constraint that left no real alternative, and would understate that the retrieval decision genuinely gave something up.
+*Pattern:* before documenting a design decision as a trade-off, check whether the alternative was actually viable. If a constraint invalidated the alternative outright, name the choice as forced, not traded — reserving "trade-off" for decisions where a real cost was knowingly accepted for a real benefit.
+
+**Pattern N: Match the Verification Mechanism's Form to What It's Actually Checking**
+*Fact:* across this pipeline's build sequence, the verification mechanism takes a different form each time it checks something different — a statistical fidelity comparison for synthesized data, schema and referential-integrity checks for ingestion, an automated leakage-column check for features, a recall threshold for model approval, a subgroup-recall-range threshold for fairness, and a six-item policy check for overall governance (Section 6).
+*Reasoning:* none of these could substitute for another — a recall threshold cannot check schema validity, and a schema check cannot detect a fairness gap — and the project used a distinct mechanism for each rather than reusing one generic pass/fail gate everywhere.
+*Pattern:* design the verification mechanism at each checkpoint to match what that specific checkpoint needs to verify, rather than defaulting to one generic gate reused across genuinely different kinds of risk.
+
+### Group 3 — Disclosure as Deliberate Practice, Not a Value Statement
+
+**Pattern C: Counting and Capping Test-Set Consultations**
+*Fact:* the test set's AUC was used as a decision signal in each of the three Diagnostic Rounds; the source material names this as test-set-adaptive tuning and states iteration stopped at round three (Section 6).
+*Reasoning:* rather than treating "look at the test set to decide whether to change something upstream" as free, the project counted these consultations and treated them as a real, if modest, methodological cost, disclosed rather than hidden.
+*Pattern:* when a held-out set is consulted more than once to guide upstream changes, count the consultations, set an explicit stopping point, and disclose the count — rather than treating repeated peeking as costless because no single instance looks like classic overfitting.
+
+**Pattern H: Embed the Use-Boundary Disclaimer in the Live Output, Not Only the Documentation**
+*Fact:* "FOR PORTFOLIO DEMONSTRATION ONLY — NOT FOR CLINICAL USE" appears in README prose and, separately, as a field in the live API's own `/predict` response payload (Section 9).
+*Reasoning:* documentation can be skipped by a caller; a field in the actual response cannot be, since anyone who calls the endpoint receives it.
+*Pattern:* when a system has a hard use-boundary, encode the disclaimer in the system's own live output wherever practical, not only in documentation a user or downstream integrator might not read.
+
+**Pattern I: Distinguish a Verification Mechanism Existing From It Being Validated**
+*Fact:* the PSI drift-detection mechanism is built and its thresholds are defined; the source material's own monitoring output reports "insufficient data" for a reliable estimate, with a stated minimum volume not yet reached (Section 10).
+*Reasoning:* "the monitoring is built" and "the monitoring has been shown to work" are different claims, and the project's own reporting keeps them separate rather than treating the framework's existence as proof of its function.
+*Pattern:* for any monitoring or verification mechanism with a cold-start data requirement, report its existence and its validation status as two separate facts. Do not let "the capability is built" stand in for "the capability has been demonstrated to work."
+
+### Group 4 — System Design Boundaries
+
+**Pattern G: A Portability Property Doesn't Extend Beyond Where It Was Deliberately Built**
+*Fact:* the pipeline's storage layer is provider-agnostic by design; the dashboard's connection to the API is a hardcoded URL, not a configuration value (Sections 5 and 9).
+*Reasoning:* the swappable-storage design was a deliberate response to a specific constraint; nothing extended that same design intent to the dashboard's API connection, which had no comparable pressure to be swappable.
+*Pattern:* a portability or configurability property established for one component does not automatically hold for another, even a related one, unless it was deliberately built there too. Verify rather than assume a design property generalizes across a system.
+
+**Pattern J: When Two Automated Systems Share a Trigger, Their Relationship Needs Explicit Design**
+*Fact:* the CI/CD pipeline and Railway's auto-deploy are both triggered by a push to `main`; the source material does not establish whether one gates the other or whether they run independently (Section 9's open evidence gap).
+*Reasoning:* two systems sharing a trigger is not the same as one system depending on the other's outcome. Without an explicit statement of the relationship, it cannot be told whether a failing test run actually prevents a bad deployment.
+*Pattern:* when two automated systems — a verification gate and a deployment trigger, for instance — respond to the same event, explicitly design and document whether one depends on the other's result, rather than letting the relationship be inferred from the fact that they share a trigger. *This pattern's motivating evidence is itself an unresolved gap, not a resolved success — it is included because the gap demonstrates the risk, not because the project solved it.*
+
+**Pattern K: Match Data Persistence Policy to What the Data Actually Needs to Preserve**
+*Fact:* seven of the pipeline's eight governance tables are append-only; one, `rag_chunks`, is overwritten on index rebuild (Section 10).
+*Reasoning:* the choice tracks what each table is for — an audit trail needs its full history; an index needs only its current state.
+*Pattern:* when designing a system's persistence layer, decide append-only versus overwrite per data type based on whether history or only current state matters for that data — rather than applying one uniform retention policy to every table.
+
+**Pattern O: Separate the Rule From the Record**
+*Fact:* this project keeps a governance-rules document — locked decisions, stating what a threshold means or what a flag certifies — architecturally distinct from its governance tables, which append-only record what actually happened in each run (Section 10).
+*Reasoning:* a rule and an instance of that rule being applied are different kinds of information with different change frequencies — a rule changes rarely and deliberately; a record accumulates continuously.
+*Pattern:* in a system with both governance policy and an operational audit trail, keep the two in architecturally distinct artifacts — a rules document that changes deliberately and rarely, and an instance-tracking record that accumulates continuously — rather than mixing interpretive rules and raw records in the same store.
+
+### Candidates That Did Not Survive
+
+Four candidates from Sections 5 through 10's raw material are named here explicitly rather than silently dropped:
+
+1. **"A comprehensive automated test suite can surface infrastructure problems occasional use wouldn't"** (Section 8). Rejected: this is well-established software-testing wisdom. The Windows DuckDB locking issue illustrates it concretely, but the underlying principle is not something this project's own reasoning uniquely discovered.
+2. **The `*_core()` separation-of-concerns pattern for testability** (Sections 5 and 8). Rejected: separating business logic from a delivery or framework layer for testability is a well-established software architecture principle. This project applied it correctly and demonstrably, but the pattern itself is not something this project's reasoning contributes as a novel practice.
+3. **"Different components can warrant different deployment automation levels," as its own pattern** (Section 9). Rejected as a standalone entry: the genuinely evidenced content is better captured by Patterns G and J above, which state the more specific and better-evidenced versions of this observation. Repeating it separately would be redundant, not additive.
+4. **"Build systems in verified stages," in the generic sense** (Section 6). Rejected on its own: staged builds with verification gates are standard, widely known engineering practice. The specific, evidenced insight — that the verification mechanism's *form* should match what's being checked — survives as Pattern N above.
+
+### Candidate Material for Section 12
+
+Section 12's compliance audit should verify that this section actually satisfies WF-000 §6.1's characterization of WF-001 as "a template for the documents that follow it" — that is, that the patterns above are stated in genuinely project-independent terms, not merely restated healthcare-pipeline facts wearing general-sounding titles. This document does not perform that audit here; it is named as Section 12's work, not manufactured as a second candidate list for symmetry with Sections 6 through 10.
+
+## Acceptance Criteria
+
+1. Every extracted pattern is stated in project-independent terms and traces to specific evidence from Sections 4 through 10, with the observed fact, demonstrated reasoning, and generalized pattern kept visibly distinct.
+2. At least one candidate from the Sections 5–10 material is explicitly rejected as not surviving the transferability test, with a stated reason, rather than every candidate being force-fit into a pattern.
+3. Patterns whose sourcing involves synthesis beyond what the source material states explicitly (Pattern L) are flagged as such, rather than presented as if the original project used this exact framing.
+4. Any pattern whose motivating evidence is itself an unresolved gap from an earlier section (Pattern J) is explicitly marked as depending on that gap, not presented as resting on a settled fact.
+5. No discrepancy already resolved or classified in Sections 2 through 10 — Master-CV.md, the test count, the governance-table count, the CI/deploy relationship — is re-investigated here.
+6. The compliance audit of whether this section satisfies WF-000 §6.1's template characterization is explicitly deferred to Section 12, not performed here.
+7. Section 12's candidate material is limited to what genuinely follows from this section's work, not manufactured for symmetry.
+
+## Verification Checklist
+
+- [x] Every pattern states an observed fact, the reasoning it demonstrates, and a generalized pattern, kept visibly distinct
+- [x] Four candidates are explicitly rejected, each with a stated reason
+- [x] Pattern L's synthesis is flagged rather than attributed wholesale to the original project
+- [x] Pattern J is explicitly marked as depending on Section 9's unresolved evidence gap
+- [x] No Section 2–10 discrepancy is re-investigated
+- [x] The Section 12 compliance audit is named as deferred, not performed here
+- [x] Candidate Material for Section 12 contains only genuinely-derived material, not a symmetry placeholder
+- [ ] Confirmed by Kingsley before Section 12 begins
+
+---
+
+**Section 11 of 12 drafted. Pending confirmation before Section 12 begins.**
 
 ---
 
