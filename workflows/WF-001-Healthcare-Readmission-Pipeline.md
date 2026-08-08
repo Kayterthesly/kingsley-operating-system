@@ -983,7 +983,7 @@ Section 2 already drew this boundary and it is reaffirmed rather than re-derived
 
 ---
 
-**Section 10 of 12 drafted. Pending confirmation before Section 11 begins.**
+**Section 10 of 12 complete. Approved 2026-08-06**
 
 ---
 
